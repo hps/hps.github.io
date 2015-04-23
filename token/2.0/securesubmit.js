@@ -556,7 +556,7 @@ var hps = (function ($) {
             var iframe_url;
             var frame = document.createElement('iframe');
 
-            env = options.public_key.split("_")[1];
+            var env = options.public_key.split("_")[1];
 
             if (env === "cert") {
                 iframe_url = HPS.Urls.iframeCERT;
