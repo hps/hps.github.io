@@ -11,7 +11,7 @@ var hps = (function ($) {
         Urls: {
             CERT: "https://posgateway.cert.secureexchange.net/Hps.Exchange.PosGateway.Hpf.v1/api/token",
             PROD: "https://api.heartlandportico.com/SecureSubmit.v1/api/token",
-            iframeCERT: "https://github.com/hps/hps.github.io/tree/master/token/2.0/securesubmit.js",
+            iframeCERT: "https://hps.github.io/token/2.0/securesubmit.js",
             iframePROD: "" // tbd
         },
 
