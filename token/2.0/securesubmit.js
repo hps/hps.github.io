@@ -608,7 +608,7 @@ var hps = (function ($) {
             });
 
             $(options.buttonTarget).click(function () {
-                frame.contentWindow.postMessage({action: "tokenize", message: options.publicKey}, '*');
+                frame.contentWindow.postMessage({action: "tokenize", message: options.public_key}, '*');
             });
         }
     };
