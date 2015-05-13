@@ -554,26 +554,30 @@ var hps = (function ($) {
         configureIframe: function (options) {
             var useDefaultStyles = true;
             var iframe_url;
+            var env = options.public_key.split("_")[1];
             var frame = document.createElement('iframe');
 
-            var env = options.public_key.split("_")[1];
-
-            if (env === "cert") {
-                iframe_url = HPS.Urls.iframeCERT;
+            if (options.targetType === 'myframe') {
+                frame = document.getElementById(options.iframeTarget);
             } else {
-                iframe_url = HPS.Urls.iframePROD;
-            }
+                if (env === "cert") {
+                    iframe_url = HPS.Urls.iframeCERT;
+                } else {
+                    iframe_url = HPS.Urls.iframePROD;
+                }
 
-            frame.id = 'securesubmit-iframe';
-            frame.src = iframe_url;
-            frame.style.border = '0';
-            frame.scrolling = 'no'
+                frame.id = 'securesubmit-iframe';
+                frame.src = iframe_url;
+                frame.style.border = '0';
+                frame.scrolling = 'no';
+
+                $(options.iframeTarget).append(frame);
+            }
 
             if (typeof options.useDefaultStyles !== 'undefined' && options.useDefaultStyles === false) {
                 useDefaultStyles = false;
             }
 
-            $(options.iframeTarget).append(frame);
             HPS.frame = frame;
 
             $(window).on("message", function (e) {
