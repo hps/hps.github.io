@@ -558,7 +558,7 @@ var hps = (function ($) {
             var frame = document.createElement('iframe');
 
             if (options.targetType === 'myframe') {
-                frame = document.getElementById(options.iframeTarget);
+                frame = $(options.iframeTarget).get(0); // jq selector will pull back an array if more than one match.
             } else {
                 if (env === "cert") {
                     iframe_url = HPS.Urls.iframeCERT;
