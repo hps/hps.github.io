@@ -1,4 +1,7 @@
-﻿/*global $, jQuery*/
+//JSON2
+"object"!=typeof JSON&&(JSON={}),function(){"use strict";function f(t){return 10>t?"0"+t:t}function quote(t){return escapable.lastIndex=0,escapable.test(t)?'"'+t.replace(escapable,function(t){var e=meta[t];return"string"==typeof e?e:"\\u"+("0000"+t.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+t+'"'}function str(t,e){var r,n,o,f,u,p=gap,a=e[t];switch(a&&"object"==typeof a&&"function"==typeof a.toJSON&&(a=a.toJSON(t)),"function"==typeof rep&&(a=rep.call(e,t,a)),typeof a){case"string":return quote(a);case"number":return isFinite(a)?a+"":"null";case"boolean":case"null":return a+"";case"object":if(!a)return"null";if(gap+=indent,u=[],"[object Array]"===Object.prototype.toString.apply(a)){for(f=a.length,r=0;f>r;r+=1)u[r]=str(r,a)||"null";return o=0===u.length?"[]":gap?"[\n"+gap+u.join(",\n"+gap)+"\n"+p+"]":"["+u.join(",")+"]",gap=p,o}if(rep&&"object"==typeof rep)for(f=rep.length,r=0;f>r;r+=1)"string"==typeof rep[r]&&(n=rep[r],o=str(n,a),o&&u.push(quote(n)+(gap?": ":":")+o));else for(n in a)Object.prototype.hasOwnProperty.call(a,n)&&(o=str(n,a),o&&u.push(quote(n)+(gap?": ":":")+o));return o=0===u.length?"{}":gap?"{\n"+gap+u.join(",\n"+gap)+"\n"+p+"}":"{"+u.join(",")+"}",gap=p,o}}"function"!=typeof Date.prototype.toJSON&&(Date.prototype.toJSON=function(){return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+f(this.getUTCMonth()+1)+"-"+f(this.getUTCDate())+"T"+f(this.getUTCHours())+":"+f(this.getUTCMinutes())+":"+f(this.getUTCSeconds())+"Z":null},String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(){return this.valueOf()});var cx,escapable,gap,indent,meta,rep;"function"!=typeof JSON.stringify&&(escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,meta={"\b":"\\b","    ":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"},JSON.stringify=function(t,e,r){var n;if(gap="",indent="","number"==typeof r)for(n=0;r>n;n+=1)indent+=" ";else"string"==typeof r&&(indent=r);if(rep=e,e&&"function"!=typeof e&&("object"!=typeof e||"number"!=typeof e.length))throw Error("JSON.stringify");return str("",{"":t})}),"function"!=typeof JSON.parse&&(cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,JSON.parse=function(text,reviver){function walk(t,e){var r,n,o=t[e];if(o&&"object"==typeof o)for(r in o)Object.prototype.hasOwnProperty.call(o,r)&&(n=walk(o,r),void 0!==n?o[r]=n:delete o[r]);return reviver.call(t,e,o)}var j;if(text+="",cx.lastIndex=0,cx.test(text)&&(text=text.replace(cx,function(t){return"\\u"+("0000"+t.charCodeAt(0).toString(16)).slice(-4)})),/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,"@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]").replace(/(?:^|:|,)(?:\s*\[)+/g,"")))return j=eval("("+text+")"),"function"==typeof reviver?walk({"":j},""):j;throw new SyntaxError("JSON.parse")})}();
+
+/*global $, jQuery*/
 var hps = (function ($) {
     "use strict";
 
@@ -205,10 +208,10 @@ var hps = (function ($) {
                   exp_year: document.getElementById('heartland-expiration-year').value
                 },
                 success: function(response) {
-                  window.parent.postMessage({action: "onTokenSuccess", response: response}, '*');
+                    HPS.Messages.postMessage({action: "onTokenSuccess", response: response}, HPS.parent_url, 'parent');
                 },
                 error: function (response) {
-                  window.parent.postMessage({action: "onTokenError", response: response}, '*'); // this is untested
+                    HPS.Messages.postMessage({action: "onTokenError", response: response}, HPS.parent_url, 'parent');
                 }
             });
         },
@@ -218,7 +221,8 @@ var hps = (function ($) {
         },
 
         _appendStyle: function (elementid, htmlstyle) {
-            var newstyle = $('#' + elementid).attr('style') + htmlstyle;
+            var currstyle = $('#' + elementid).attr('style');
+            var newstyle = (currstyle ? currstyle : '') + htmlstyle;
             document.getElementById(elementid).setAttribute('style', newstyle);
         },
 
@@ -232,7 +236,7 @@ var hps = (function ($) {
 
         _resizeFrame: function () {
             var docHeight = jQuery('html').height();
-            window.parent.postMessage({action: "resize", height: docHeight}, '*');
+            HPS.Messages.postMessage({action: "resize", height: docHeight}, HPS.parent_url, 'parent');
         },
 
         _styles: {
@@ -344,7 +348,7 @@ var hps = (function ($) {
             );
           },
           cvv: function () {
-            HPS.appendStyle('heartland-cvv', 'width: 110px;');
+            HPS.appendStyle('heartland-cvv', 'width: 110px;', false);
           }
         },
 
@@ -353,21 +357,19 @@ var hps = (function ($) {
         },
 
         setText: function (elementid, elementtext) {
-            HPS.frame.contentWindow.postMessage({action: "setText", id: elementid, text: elementtext}, '*');
+            HPS.Messages.postMessage({action: "setText", id: elementid, text: elementtext}, HPS.iframe_url, 'child');
         },
 
         setStyle: function (elementid, elementstyle) {
-            HPS.frame.contentWindow.postMessage({action: "setStyle", id: elementid, style: elementstyle}, '*');
+            HPS.Messages.postMessage({action: "setStyle", id: elementid, style: elementstyle}, HPS.iframe_url, 'child');
         },
 
         appendStyle: function (elementid, elementstyle) {
-            HPS.frame.contentWindow.postMessage({action: "appendStyle", id: elementid, style: elementstyle}, '*');
+            HPS.Messages.postMessage({action: "appendStyle", id: elementid, style: elementstyle}, HPS.iframe_url, 'child');
         },
 
         trim: function (string) {
-
             if (string !== undefined && typeof string === "string" ) {
-
                 string = string.toString().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
             }
 
@@ -517,9 +519,23 @@ var hps = (function ($) {
             });
         },
 
+        parent: null,
+        parent_url: '',
         configureInternalIframe: function (options) {
-            $(window).on("message", function (e) {
-                var m = e.originalEvent;
+            HPS.parent = window.parent;
+            HPS.Messages = new window.Messages();
+            HPS.parent_url = decodeURIComponent(document.location.hash.replace(/^#/, ''));
+            options = JSON.parse(decodeURIComponent(HPS.parent_url.split('#')[1]));
+
+            $(window).on("load", function () {
+                HPS._resizeFrame();
+            });
+
+            $(document).on('receiveMessageHandlerAdded', function () {
+                HPS.Messages.postMessage({action: "receiveMessageHandlerAdded"}, HPS.parent_url, 'parent');
+            });
+
+            HPS.Messages.receiveMessage(function(m){
                 switch(m.data.action) {
                     case 'tokenize': {
                         HPS.tokenize_iframe(m.data.message);
@@ -545,29 +561,33 @@ var hps = (function ($) {
                         break;
                     }
                 }
-            });
-            $(window).on("load", function () {
-                HPS._resizeFrame();
-            });
+            }, '*');
         },
 
+        // for iframe hash updates
+        mailbox: [],
+        cache_bust: 1,
+
+        child: null,
+        iframe_url: '',
         configureIframe: function (options) {
             var useDefaultStyles = true;
-            var iframe_url;
             var env = options.public_key.split("_")[1];
             var frame = document.createElement('iframe');
+            HPS.Messages = new window.Messages();
 
             if (options.targetType === 'myframe') {
                 frame = $(options.iframeTarget).get(0); // jq selector will pull back an array if more than one match.
             } else {
                 if (env === "cert") {
-                    iframe_url = HPS.Urls.iframeCERT;
+                    HPS.iframe_url = HPS.Urls.iframeCERT;
                 } else {
-                    iframe_url = HPS.Urls.iframePROD;
+                    HPS.iframe_url = HPS.Urls.iframePROD;
                 }
+                HPS.iframe_url = HPS.iframe_url + '#' + encodeURIComponent(document.location.href.split('#')[0] + '#' + encodeURIComponent(JSON.stringify(options)));
 
                 frame.id = 'securesubmit-iframe';
-                frame.src = iframe_url;
+                frame.src = HPS.iframe_url;
                 frame.style.border = '0';
                 frame.scrolling = 'no';
 
@@ -579,9 +599,17 @@ var hps = (function ($) {
             }
 
             HPS.frame = frame;
+            if (window['postMessage']) {
+                HPS.child = frame.contentWindow;
+            } else {
+                HPS.child = frame;
+            }
 
-            $(window).on("message", function (e) {
-                var m = e.originalEvent;
+            $(options.buttonTarget).click(function () {
+                HPS.Messages.postMessage({action: "tokenize", message: options.public_key}, HPS.iframe_url, 'child');
+            });
+
+            HPS.Messages.receiveMessage(function(m){
                 switch(m.data.action) {
                     case 'onTokenSuccess': {
                         options.onTokenSuccess(m.data.response);
@@ -595,25 +623,21 @@ var hps = (function ($) {
                         HPS.resizeIFrame(frame, m.data.height);
                         break;
                     }
+                    case 'receiveMessageHandlerAdded': {
+                        if (useDefaultStyles) {
+                            HPS._styles.body();
+                            HPS._styles.labelsAndLegend();
+                            HPS._styles.inputsAndSelects();
+                            HPS._styles.fieldset();
+                            HPS._styles.selects();
+                            HPS._styles.selectLabels();
+                            HPS._styles.cvvContainer();
+                            HPS._styles.cvv();
+                        }
+                        break;
+                    }
                 }
-            });
-
-            $(window).on('load', function (e) {
-                if (useDefaultStyles) {
-                    HPS._styles.body();
-                    HPS._styles.labelsAndLegend();
-                    HPS._styles.inputsAndSelects();
-                    HPS._styles.fieldset();
-                    HPS._styles.selects();
-                    HPS._styles.selectLabels();
-                    HPS._styles.cvvContainer();
-                    HPS._styles.cvv();
-                }
-            });
-
-            $(options.buttonTarget).click(function () {
-                frame.contentWindow.postMessage({action: "tokenize", message: options.public_key}, '*');
-            });
+            }, '*');
         }
     };
 
@@ -634,3 +658,95 @@ var hps = (function ($) {
 
     return HPS;
 }(jQuery));
+
+var Messages = function(){
+    this.interval_id = null;
+    this.last_hash = null;
+    this.window = window;
+    this.pushIntervalStarted = false;
+};
+
+Messages.prototype.pushMessages = function () {
+    var message = [];
+    var i = length = 0;
+    var target_url = current = targetNode = null;
+
+    length = window.hps.mailbox.length;
+    if (!length) {
+        return;
+    }
+
+    for (i = 0; i < length; i++) {
+        current = window.hps.mailbox.shift();
+        if (!target_url) {
+            target_url = current.targetUrl;
+            targetNode = current.targetNode;
+        }
+        message.push(current.message);
+    }
+
+    if (message !== []) {
+        message = JSON.stringify(message);
+        targetNode.location = target_url.replace(/#.*$/, '') + '#' + (+new Date) + (window.hps.cache_bust++) + '&' + encodeURIComponent(message);
+    }
+
+    message.length = 0;
+    window.hps.mailbox.length = 0;
+};
+
+Messages.prototype.postMessage = function(message, target_url, target) {
+    var targetNode;
+    if (!target_url) {
+       return;
+    }
+
+    targetNode = this.window.hps[target];
+
+    if (this.window['postMessage']) {
+        targetNode['postMessage'](message, target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1'));
+    } else if (target_url) {
+        this.window.hps.mailbox.push({
+            message: message,
+            targetUrl: target_url,
+            targetNode: targetNode
+        });
+        if (!this.pushIntervalStarted) {
+            setInterval(this.pushMessages, 100);
+        }
+    }
+};
+
+Messages.prototype.receiveMessage = function(callback, source_origin) {
+    if (this.window['postMessage']) {
+        if (window['addEventListener']) {
+            window[callback ? 'addEventListener' : 'removeEventListener']('message', callback, !1);
+        } else {
+            window[callback ? 'attachEvent' : 'detachEvent']('onmessage', callback);
+        }
+    } else {
+        this.interval_id && clearInterval(this.interval_id);
+        this.interval_id = null;
+
+        if (callback) {
+            this.interval_id = setInterval(function(){
+                var hash = document.location.hash,
+                re = /^#?\d+&/;
+                if (hash !== this.last_hash && re.test(hash)) {
+                    var m = {};
+                    var i;
+                    m.data = JSON.parse(decodeURIComponent(hash.replace(re, '')));
+                    this.last_hash = hash;
+                    if (Object.prototype.toString.call(m.data) !== '[object Array]') {
+                        callback(m);
+                        return;
+                    }
+
+                    for (i in m.data) {
+                        callback({data: m.data[i]});
+                    }
+                }
+            }, 100);
+        }
+    }
+    jQuery(document).trigger('receiveMessageHandlerAdded');
+};
