@@ -525,7 +525,6 @@ var hps = (function ($) {
             HPS.parent = window.parent;
             HPS.Messages = new window.Messages();
             HPS.parent_url = decodeURIComponent(document.location.hash.replace(/^#/, ''));
-            options = JSON.parse(decodeURIComponent(HPS.parent_url.split('#')[1]));
 
             $(window).on("load", function () {
                 HPS._resizeFrame();
@@ -584,7 +583,7 @@ var hps = (function ($) {
                 } else {
                     HPS.iframe_url = HPS.Urls.iframePROD;
                 }
-                HPS.iframe_url = HPS.iframe_url + '#' + encodeURIComponent(document.location.href.split('#')[0] + '#' + encodeURIComponent(JSON.stringify(options)));
+                HPS.iframe_url = HPS.iframe_url + '#' + encodeURIComponent(document.location.href.split('#')[0]);
 
                 frame.id = 'securesubmit-iframe';
                 frame.src = HPS.iframe_url;
