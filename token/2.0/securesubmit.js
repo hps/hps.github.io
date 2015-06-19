@@ -572,36 +572,38 @@ var hps = (function ($) {
         configureIframe: function (options) {
             var useDefaultStyles = true;
             var env = options.public_key.split("_")[1];
-            var frame = document.createElement('iframe');
+            var frame;
             HPS.Messages = new window.Messages();
+
+            if (env === "cert") {
+                HPS.iframe_url = HPS.Urls.iframeCERT;
+            } else {
+                HPS.iframe_url = HPS.Urls.iframePROD;
+            }
 
             if (options.targetType === 'myframe') {
                 frame = $(options.iframeTarget).get(0); // jq selector will pull back an array if more than one match.
+                HPS.iframe_url = frame.src;
             } else {
-                if (env === "cert") {
-                    HPS.iframe_url = HPS.Urls.iframeCERT;
-                } else {
-                    HPS.iframe_url = HPS.Urls.iframePROD;
-                }
-                HPS.iframe_url = HPS.iframe_url + '#' + encodeURIComponent(document.location.href.split('#')[0]);
-
+                frame = document.createElement('iframe');
                 frame.id = 'securesubmit-iframe';
-                frame.src = HPS.iframe_url;
                 frame.style.border = '0';
                 frame.scrolling = 'no';
-
                 $(options.iframeTarget).append(frame);
             }
 
-            if (typeof options.useDefaultStyles !== 'undefined' && options.useDefaultStyles === false) {
-                useDefaultStyles = false;
-            }
+            HPS.iframe_url = HPS.iframe_url + '#' + encodeURIComponent(document.location.href.split('#')[0]);
+            frame.src = HPS.iframe_url;
 
             HPS.frame = frame;
             if (window['postMessage']) {
                 HPS.child = frame.contentWindow;
             } else {
                 HPS.child = frame;
+            }
+
+            if (typeof options.useDefaultStyles !== 'undefined' && options.useDefaultStyles === false) {
+                useDefaultStyles = false;
             }
 
             $(options.buttonTarget).click(function () {
