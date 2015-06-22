@@ -635,6 +635,7 @@ var hps = (function ($) {
                             HPS._styles.cvvContainer();
                             HPS._styles.cvv();
                         }
+                        $(document).trigger('securesubmitIframeReady');
                         break;
                     }
                 }
