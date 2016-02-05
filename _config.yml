@@ -1,0 +1,18 @@
+# Site settings
+title: Heartland API Documentation
+email: EntApp_DevPortal@e-hps.com\
+github_username: hps
+
+# slate settings
+slate:
+  search: true
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - bin/
