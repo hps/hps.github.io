@@ -1,0 +1,61 @@
+<!-- The Payment Form -->
+<form id="standard" action="" method="GET">
+  <dt><label for="standardCardNumber">Card Number:</label></dt>
+  <dd><input type="tel" id="standardCardNumber" placeholder="•••• •••• •••• ••••" /></dd>
+  <dt><label for="standardCardExpiration">Card Expiration:</label></dt>
+  <dd><input type="tel" id="standardCardExpiration" placeholder="MM / YYYY" /></dd>
+  <dt><label for="standardCardCvv">Card CVV:</label></dt>
+  <dd><input type="tel" id="standardCardCvv" placeholder="CVV" /></dd>
+  <br />
+  <input type="submit" value="Submit" />
+  <button id="standardShowCode" type="button">Show Code</button>
+</form>
+<!-- The SecureSubmit Javascript Library -->
+<script type="text/javascript" src="https://hps.github.io/token/2.1/securesubmit.js"></script>
+<!-- The Integration Code -->
+<script type="text/javascript">
+  (function (document, Heartland) {
+    // Enhance the payment fields
+    Heartland.Card.attachNumberEvents('#standardCardNumber');
+    Heartland.Card.attachExpirationEvents('#standardCardExpiration');
+    Heartland.Card.attachCvvEvents('#standardCardCvv');
+
+    // Attach a handler to interrupt the form submission
+    Heartland.Events.addHandler(document.getElementById('standard'), 'submit', function (e) {
+      // Prevent the form from continuing to the `action` address
+      e.preventDefault();
+
+      try {
+        // Grab references to the field elements
+        var card       = document.getElementById('standardCardNumber');
+        var expiration = document.getElementById('standardCardExpiration');
+        var cvv        = document.getElementById('standardCardCvv');
+
+        // Parse the expiration date
+        var split = expiration.value.split(' / ');
+        var month = split[0].replace(/^\s+|\s+$/g, '');
+        var year  = split[1].replace(/^\s+|\s+$/g, '');
+
+        // Create a new `HPS` object with the necessary configuration
+        (new Heartland.HPS({
+          publicKey:    'pkapi_cert_jKc1FtuyAydZhZfbB3',
+          cardNumber:   card.value.replace(/\D/g, ''),
+          cardCvv:      cvv.value.replace(/\D/g, ''),
+          cardExpMonth: month.replace(/\D/g, ''),
+          cardExpYear:  year.replace(/\D/g, ''),
+          // Callback when a token is received from the service
+          success: function (resp) {
+            alert('Here is a single-use token: ' + resp.token_value);
+          },
+          // Callback when an error is received from the service
+          error: function (resp) {
+            alert('There was an error: ' + resp.error.message);
+          }
+        // Immediately call the tokenize method to get a token
+        })).tokenize();
+      } catch (e) {
+        alert('There was an issue submitting. Are all of the fields filled out?');
+      }
+    });
+  }(document, Heartland));
+</script>

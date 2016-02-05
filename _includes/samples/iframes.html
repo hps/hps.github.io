@@ -1,0 +1,84 @@
+<!-- The Payment Form -->
+<form id="iframes" action="" method="GET">
+  <dt><label for="iframesCardNumber">Card Number:</label></dt>
+  <dd><div id="iframesCardNumber"></div></dd>
+  <dt><label for="iframesCardExpiration">Card Expiration:</label></dt>
+  <dd><div id="iframesCardExpiration"></div></dd>
+  <dt><label for="iframesCardCvv">Card CVV:</label></dt>
+  <dd><div id="iframesCardCvv"></div></dd>
+  <br />
+  <input type="submit" value="Submit" />
+  <button id="iframesShowCode" type="button">Show Code</button>
+</form>
+<!-- The SecureSubmit Javascript Library -->
+<script type="text/javascript" src="https://hps.github.io/token/2.1/securesubmit.js"></script>
+<!-- The Integration Code -->
+<script type="text/javascript">
+  (function (document, Heartland) {
+    // Create a new `HPS` object with the necessary configuration
+    var hps = new Heartland.HPS({
+      publicKey: 'pkapi_cert_jKc1FtuyAydZhZfbB3',
+      type:      'iframe',
+      // Configure the iframe fields to tell the library where
+      // the iframe should be inserted into the DOM and some
+      // basic options
+      fields: {
+        cardNumber: {
+          target:      'iframesCardNumber',
+          placeholder: '•••• •••• •••• ••••'
+        },
+        cardExpiration: {
+          target:      'iframesCardExpiration',
+          placeholder: 'MM / YYYY'
+        },
+        cardCvv: {
+          target:      'iframesCardCvv',
+          placeholder: 'CVV'
+        }
+      },
+      // Collection of CSS to inject into the iframes.
+      // These properties can match the site's styles
+      // to create a seamless experience.
+      style: {
+        'input': {
+          // 'background': '#fff',
+          // 'border': '1px solid',
+          // 'border-color': '#bbb3b9 #c7c1c6 #c7c1c6',
+          // 'box-sizing': 'border-box',
+          // 'font-family': 'serif',
+          // 'font-size': '16px',
+          // 'line-height': '1',
+          // 'margin': '0 .5em 0 0',
+          // 'max-width': '100%',
+          // 'outline': '0',
+          // 'padding': '0.5278em',
+          // 'vertical-align': 'baseline',
+          // 'width': '100%'
+        }
+      },
+      // Callback when a token is received from the service
+      onTokenSuccess: function (resp) {
+        alert('Here is a single-use token: ' + resp.token_value);
+      },
+      // Callback when an error is received from the service
+      onTokenError: function (resp) {
+        alert('There was an error: ' + resp.error.message);
+      }
+    });
+
+    // Attach a handler to interrupt the form submission
+    Heartland.Events.addHandler(document.getElementById('iframes'), 'submit', function (e) {
+      // Prevent the form from continuing to the `action` address
+      e.preventDefault();
+      // Tell the iframes to tokenize the data
+      hps.Messages.post(
+        {
+          accumulateData: true,
+          action: 'tokenize',
+          message: 'pkapi_cert_jKc1FtuyAydZhZfbB3'
+        },
+        'cardNumber'
+      );
+    });
+  }(document, Heartland));
+</script>
