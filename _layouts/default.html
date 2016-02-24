@@ -31,15 +31,17 @@ under the License. -->
 
         var framed = false;
 
-        try {
-          framed = window.self !== window.top;
-        } catch (e) {
-            framed = true;
-        }
+        {% unless jekyll.environment == 'development' %}
+          try {
+            framed = window.self !== window.top;
+          } catch (e) {
+              framed = true;
+          }
 
-        if (!framed) {
-          window.location = 'https://developer.heartlandpaymentsystems.com/SecureSubmit/Documentation';
-        }
+          if (!framed) {
+            window.location = 'https://developer.heartlandpaymentsystems.com/SecureSubmit/Documentation';
+          }
+        {% endunless %}
       });
     </script>
   </head>
