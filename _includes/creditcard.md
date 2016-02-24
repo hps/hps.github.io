@@ -396,7 +396,7 @@ Transaction Id | The authorization transaction Id.
 Amount (optional) | An amount to charge (optional). Used if different from original authorization.
 
 ### Returns: HpsReportTransactionDetails (of HpsAuthorization)
-
+ 
 Parameter | Description
 --------- | -----------
 HpsAuthorization | Returns the above HpsAuthorization data
@@ -421,7 +421,7 @@ creditService.Refund(10.00m, "usd", chargeResponse.TransactionId);
 {% highlight php %}
 <?php
 $response = $chargeService->charge(10, "usd", "put single or multi-use token here", $cardHolder);
-$chargeService->refundTransaction(10, "usd", $response->transactionId);
+$chargeService->refund(10, "usd", $response->transactionId);
 {% endhighlight %}
 
 {% highlight java %}
@@ -478,7 +478,7 @@ creditService.Reverse(authResponse.TransactionId, 10.00m, "usd");
 {% highlight php %}
 <?php
 $response = $chargeService->authorize(10, "usd", "put single or multi-use token here", $cardHolder);
-$chargeService->reverseTransaction($response->transactionId, 10, "usd");
+$chargeService->reverse($response->transactionId, 10, "usd");
 {% endhighlight %}
 
 {% highlight java %}

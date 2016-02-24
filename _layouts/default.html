@@ -28,6 +28,20 @@ under the License. -->
     <script>
       $(function() {
         setupLanguages({{ site.data.language_tabs | map: 'key' | jsonify}});
+
+        var framed = false;
+
+        {% unless jekyll.environment == 'development' %}
+          try {
+            framed = window.self !== window.top;
+          } catch (e) {
+              framed = true;
+          }
+
+          if (!framed) {
+            window.location = 'https://developer.heartlandpaymentsystems.com/SecureSubmit/Documentation';
+          }
+        {% endunless %}
       });
     </script>
   </head>
