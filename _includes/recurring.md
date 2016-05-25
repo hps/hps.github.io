@@ -184,8 +184,53 @@ schedule.email_advance_notice = 'No'
 schedule.schedule_status = HpsPayPlanScheduleStatus.ACTIVE
 {% endhighlight %}
 
-Use the following example to create a enw subscription plan for a given Payment Method.
+Use the following example to create a new subscription plan for a given Payment Method.
 The objects payPlanService and paymentMethod were defined in earlier example code.
+{% highlight php %}
+<?php
+$id = date('Ymd').'-SecureSubmit-'.substr(str_shuffle($this->alphabet), 0, 10);
+$date = date('m30Y', strtotime(date('Y-m-d', strtotime(date('Y-m-d'))).'+1 month'));
+$newPaymentSchedule = new HpsPayPlanSchedule();
+$newPaymentSchedule->scheduleIdentifier = $id;
+$newPaymentSchedule->scheduleKey        = $this->paymentMethod->customerKey;
+$newPaymentSchedule->scheduleName   = $this->paymentMethod->paymentMethodKey;
+$newPaymentSchedule->deviceId     = array('value' => 100);
+$newPaymentSchedule->paymentMethodKey          = $date;
+$newPaymentSchedule->frequency          = HpsPayPlanScheduleFrequency::WEEKLY;
+$newPaymentSchedule->duration           = HpsPayPlanScheduleDuration::LIMITED_NUMBER;
+$newPaymentSchedule->numberOfPayments   = 3;
+$newPaymentSchedule->reprocessingCount  = 2;
+$newPaymentSchedule->emailReceipt       = 'Never';
+$newPaymentSchedule->emailAdvanceNotice = 'No';
+$newPaymentSchedule->scheduleStatus     = HpsPayPlanScheduleStatus::ACTIVE
+{% endhighlight %}
+
+### Failed Scheduled Transactions
+A schedule with a Failed status is an indication that the merchant must reach out to the customer to obtain new payment information.  PayPlan has an email notification that a merchant can opt in to receive a list of all schedules that failed during the nightly processing.
+If a card exceeds retries with non-fatal decline codes, then the schedule status changes to Failed but the payment status remains Active.
+This email notification is based on emailReceipt and emailAdvanceNotice 
+
+#### Expired
+There is logic in place for recurring billing; it allows us to drop the expiration date on a card if it is less than current MMYYYY and it’s a recurring billing transaction. Eventually these will decline and/or trigger a fatal error. -below-
+
+#### Declined
+If a card is declined when processing a schedule, the “Failure Count” field is incremented.  If the Failure Count exceeds the reprocessing count, then the schedule status is also updated to ‘Failed’.  Each subsequent try is aproximately 24 hours after.
+
+#### Communication Failures
+If there is a communication failure, the schedule will fall into an error queue and no updates will be made.  Any schedule in the error queue is manually reviewed the next business day.  This is exceptionally rare and we do not typically provide any information to a merchant when an instance occurs.  
+
+
+#### Other fatal errors 
+·         Invalid
+·         Expired
+·         Lost/Stolen
+·         Revoked
+A payment status can be set to something other than Active/Inactive only by the “fatal” response codes from an issuer during schedule processing; a one-time transaction does not change a payment method status.
+For example, if we process a schedule with a card and the issuer returns lost/stolen, then the schedule status changes to failed and the payment status changes to Lost/Stolen.
+If a card exceeds retries with non-fatal decline codes, then the schedule status changes to Failed but the payment status remains Active.
+
+Once the payment method is updated an edit can be performed to restart the schedule.
+
 
 ## Find Customers
 > Find Customers
@@ -245,3 +290,45 @@ results = self.service.find_all_customers({'customerIdentifier': 'SecureSubmit'}
 {% endhighlight %}
 
 You can find customers associated with a given payment method using this method call.
+
+
+## Edit Schedule
+> Edit Schedule
+
+
+{% highlight php %}
+<?php
+
+$schedule                       = new HpsPayPlanSchedule();
+$schedule->scheduleKey          = $scheduleKey;
+$schedule->scheduleIdentifier   = "Schedule-9978";
+$schedule->scheduleStatus       = HpsPayPlanScheduleStatus::ACTIVE;
+$schedule->startDate            = date('m30Y', strtotime(date('Y-m-d', strtotime(date('Y-m-d'))).'+2 month'));
+$schedule->processingDateInfo   = 1;
+$schedule->frequency            = 'Monthly';
+$schedule->duration             = 'Ongoing';
+{% endhighlight %}
+
+
+Conditional Parameters
+scheduleStarted returns true if at least one transaction in the schedule has processed even if it has declined. The PHP-SDK will drop illegally passed fields during the edit call. More complete code examples can be found in the SDK
+
+
+### scheduleStarted = False
+The following fields may only be edited when the schedule has not started processing
+Parameter | Description
+--------- | -----------
+scheduleIdentifier | String 50 character max
+startDate | date in DDMMYYYY format
+frequency | Weekly,Bi-Weekly,Semi-Monthly,Monthly,Bi-Monthly,Quarterly,Semi-Annually,Annually
+duration | Ongoing,Limited,Number,End Date
+
+### scheduleStarted = true
+Once the schedule has started processing then the following field becomes editable
+Parameter | Description
+--------- | -----------
+NextProcessingDate |  date in DDMMYYYY format
+cancellationDate | date in DDMMYYYY format
+
+
+

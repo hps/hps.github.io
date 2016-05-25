@@ -471,6 +471,7 @@ var Heartland;
             frame.id = 'heartland-frame-' + name;
             frame.name = name;
             frame.style.border = '0';
+            frame.frameBorder = '0';
             frame.scrolling = 'no';
             return frame;
         }
@@ -570,8 +571,7 @@ var Heartland;
          * @param {Heartland.HPS} hps
          */
         function resizeFrame(hps) {
-            var html = document.getElementsByTagName('html')[0];
-            var docHeight = html.offsetHeight + 1; // off by one error
+            var docHeight = document.body.offsetHeight + 1; // off by one error
             hps.Messages.post({ action: 'resize', height: docHeight }, 'parent');
         }
         DOM.resizeFrame = resizeFrame;
@@ -816,7 +816,7 @@ var Heartland;
                 if (!type.format.global) {
                     matches.shift();
                 }
-                return matches.join(' ');
+                return matches.join(' ').replace(/^\s+|\s+$/gm, '');
             };
             return CardNumber;
         })();
@@ -946,6 +946,9 @@ var Heartland;
                 if (!/^\d+$/.test(y)) {
                     return false;
                 }
+                if (y.length === 2) {
+                    y = (new Date).getFullYear().toString().slice(0, 2) + y;
+                }
                 month = parseInt(m, 10);
                 year = parseInt(y, 10);
                 if (!(1 <= month && month <= 12)) {
@@ -989,15 +992,45 @@ var Heartland;
             if (!number) {
                 return null;
             }
+            if (number.replace(/^\s+|\s+$/gm, '').length < 4) {
+                return null;
+            }
             for (i in Card.types) {
                 cardType = Card.types[i];
-                if (cardType.regex.test(number)) {
+                if (cardType && cardType.regex && cardType.regex.test(number)) {
                     break;
                 }
             }
             return cardType;
         }
         Card.typeByNumber = typeByNumber;
+        /**
+         * Heartland.Card.typeByTrack
+         *
+         * @param {string} data - track data
+         * @param {boolean} isEncrypted - (default: false)
+         * @param {string} trackNumber
+         *
+         * @returns CardType
+         */
+        function typeByTrack(data, isEncrypted, trackNumber) {
+            if (isEncrypted === void 0) { isEncrypted = false; }
+            var number;
+            if (isEncrypted && trackNumber && trackNumber === '02') {
+                number = data.split('=')[0];
+            }
+            else {
+                var temp = data.split('%');
+                if (temp[1]) {
+                    temp = temp[1].split('^');
+                    if (temp[0]) {
+                        number = temp[0].toString().substr(1);
+                    }
+                }
+            }
+            return typeByNumber(number);
+        }
+        Card.typeByTrack = typeByTrack;
         /**
          * Heartland.Card.luhnCheck
          *
@@ -1040,20 +1073,22 @@ var Heartland;
          * @param {Event} e
          */
         function addType(e) {
-            var target = e.currentTarget;
+            var target = (e.currentTarget ? e.currentTarget : e.srcElement);
             var type = typeByNumber(target.value);
-            var length = target.classList.length;
+            var classList = target.className.split(' ');
+            var length = classList.length;
             var i = 0;
             var c = '';
             for (i; i < length; i++) {
-                c = target.classList.item(i);
-                if (c && c.indexOf('card-type-') === 0) {
-                    target.classList.remove(c);
+                c = classList[i];
+                if (c && c.indexOf('card-type-') !== -1) {
+                    delete classList[i];
                 }
             }
             if (type) {
-                target.classList.add('card-type-' + type.code);
+                classList.push('card-type-' + type.code);
             }
+            target.className = classList.join(' ').replace(/^\s+|\s+$/gm, '');
         }
         Card.addType = addType;
         /**
@@ -1065,10 +1100,24 @@ var Heartland;
          * @param {Event} e
          */
         function formatNumber(e) {
-            var target = e.currentTarget;
+            var target = (e.currentTarget ? e.currentTarget : e.srcElement);
             var value = target.value;
-            value = (new Heartland.Formatter.CardNumber).format(value);
-            target.value = value;
+            var formatted = (new Heartland.Formatter.CardNumber).format(value);
+            target.value = formatted;
+            if (!target.setSelectionRange) {
+                return;
+            }
+            var cursor = target.selectionStart;
+            // copy and paste, space inserted on formatter
+            if (value.length < formatted.length) {
+                cursor += formatted.length - value.length;
+            }
+            // check if before new inserted digit is a space
+            if (value.charAt(cursor) === ' ' &&
+                formatted.charAt(cursor - 1) === ' ') {
+                cursor += 1;
+            }
+            target.setSelectionRange(cursor, cursor);
         }
         Card.formatNumber = formatNumber;
         /**
@@ -1079,7 +1128,7 @@ var Heartland;
          * @param {KeyboardEvent} e
          */
         function formatExpiration(e) {
-            var target = e.currentTarget;
+            var target = (e.currentTarget ? e.currentTarget : e.srcElement);
             var value = target.value;
             // allow: delete, backspace
             if ([46, 8].indexOf(e.keyCode) !== -1 ||
@@ -1103,7 +1152,7 @@ var Heartland;
          */
         function restrictLength(length) {
             return function (e) {
-                var target = e.currentTarget;
+                var target = (e.currentTarget ? e.currentTarget : e.srcElement);
                 var value = target.value;
                 // allow: backspace, delete, tab, escape and enter
                 if ([46, 8, 9, 27, 13, 110].indexOf(e.keyCode) !== -1 ||
@@ -1115,7 +1164,7 @@ var Heartland;
                     return;
                 }
                 if (value.length >= length) {
-                    e.preventDefault();
+                    e.preventDefault ? e.preventDefault() : (e.returnValue = false);
                 }
             };
         }
@@ -1140,10 +1189,35 @@ var Heartland;
             }
             // ensure that it is a number and stop the keypress
             if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
-                e.preventDefault();
+                e.preventDefault ? e.preventDefault() : (e.returnValue = false);
             }
         }
         Card.restrictNumeric = restrictNumeric;
+        /**
+         * Heartland.Card.deleteProperly
+         *
+         * Places cursor on the correct position to
+         * let the browser delete the digit instead
+         * of the space.
+         *
+         * @param {KeyboardEvent} e
+         */
+        function deleteProperly(e) {
+            var target = (e.currentTarget ? e.currentTarget : e.srcElement);
+            var value = target.value;
+            if (!target.setSelectionRange) {
+                return;
+            }
+            var cursor = target.selectionStart;
+            // allow: delete, backspace
+            if ([46, 8].indexOf(e.keyCode) !== -1 &&
+                // if space to be deleted
+                (value.charAt(cursor - 1) === ' ')) {
+                // placing cursor before space to delete digit instead
+                target.setSelectionRange(cursor - 1, cursor - 1);
+            }
+        }
+        Card.deleteProperly = deleteProperly;
         /**
          * Heartland.Card.validateNumber
          *
@@ -1155,16 +1229,24 @@ var Heartland;
          * @param {Event} e
          */
         function validateNumber(e) {
-            var target = e.currentTarget;
+            var target = (e.currentTarget ? e.currentTarget : e.srcElement);
             var value = target.value;
+            var classList = target.className.split(' ');
+            var length = classList.length;
+            var c = '';
+            for (var i = 0; i < length; i++) {
+                c = classList[i];
+                if (c.indexOf('valid') !== -1) {
+                    delete classList[i];
+                }
+            }
             if ((new Heartland.Validator.CardNumber).validate(value)) {
-                target.classList.remove('invalid');
-                target.classList.add('valid');
+                classList.push('valid');
             }
             else {
-                target.classList.add('invalid');
-                target.classList.remove('valid');
+                classList.push('invalid');
             }
+            target.className = classList.join(' ').replace(/^\s+|\s+$/gm, '');
         }
         Card.validateNumber = validateNumber;
         /**
@@ -1177,16 +1259,24 @@ var Heartland;
          * @param {Event} e
          */
         function validateCvv(e) {
-            var target = e.currentTarget;
+            var target = (e.currentTarget ? e.currentTarget : e.srcElement);
             var value = target.value;
+            var classList = target.className.split(' ');
+            var length = classList.length;
+            var c = '';
+            for (var i = 0; i < length; i++) {
+                c = classList[i];
+                if (c.indexOf('valid') !== -1) {
+                    delete classList[i];
+                }
+            }
             if ((new Heartland.Validator.Cvv).validate(value)) {
-                target.classList.remove('invalid');
-                target.classList.add('valid');
+                classList.push('valid');
             }
             else {
-                target.classList.add('invalid');
-                target.classList.remove('valid');
+                classList.push('invalid');
             }
+            target.className = classList.join(' ').replace(/^\s+|\s+$/gm, '');
         }
         Card.validateCvv = validateCvv;
         /**
@@ -1199,16 +1289,24 @@ var Heartland;
          * @param {Event} e
          */
         function validateExpiration(e) {
-            var target = e.currentTarget;
+            var target = (e.currentTarget ? e.currentTarget : e.srcElement);
             var value = target.value;
+            var classList = target.className.split(' ');
+            var length = classList.length;
+            var c = '';
+            for (var i = 0; i < length; i++) {
+                c = classList[i];
+                if (c.indexOf('valid') !== -1) {
+                    delete classList[i];
+                }
+            }
             if ((new Heartland.Validator.Expiration).validate(value)) {
-                target.classList.remove('invalid');
-                target.classList.add('valid');
+                classList.push('valid');
             }
             else {
-                target.classList.add('invalid');
-                target.classList.remove('valid');
+                classList.push('invalid');
             }
+            target.className = classList.join(' ').replace(/^\s+|\s+$/gm, '');
         }
         Card.validateExpiration = validateExpiration;
         /**
@@ -1219,6 +1317,7 @@ var Heartland;
         function attachNumberEvents(selector) {
             Heartland.Events.addHandler(document.querySelector(selector), 'keydown', restrictNumeric);
             Heartland.Events.addHandler(document.querySelector(selector), 'keydown', restrictLength(19));
+            Heartland.Events.addHandler(document.querySelector(selector), 'keydown', deleteProperly);
             Heartland.Events.addHandler(document.querySelector(selector), 'input', formatNumber);
             Heartland.Events.addHandler(document.querySelector(selector), 'input', validateNumber);
             Heartland.Events.addHandler(document.querySelector(selector), 'input', addType);
@@ -1235,6 +1334,7 @@ var Heartland;
             Heartland.Events.addHandler(document.querySelector(selector), 'keyup', formatExpiration);
             Heartland.Events.addHandler(document.querySelector(selector), 'blur', formatExpiration);
             Heartland.Events.addHandler(document.querySelector(selector), 'input', validateExpiration);
+            Heartland.Events.addHandler(document.querySelector(selector), 'blur', validateExpiration);
         }
         Card.attachExpirationEvents = attachExpirationEvents;
         /**
@@ -1249,6 +1349,16 @@ var Heartland;
         }
         Card.attachCvvEvents = attachCvvEvents;
     })(Card = Heartland.Card || (Heartland.Card = {}));
+    if (!Array.prototype.indexOf) {
+        Array.prototype.indexOf = function (obj, start) {
+            for (var i = (start || 0), j = this.length; i < j; i++) {
+                if (this[i] === obj) {
+                    return i;
+                }
+            }
+            return -1;
+        };
+    }
 })(Heartland || (Heartland = {}));
 /// <reference path="types/CardData.ts" />
 /// <reference path="DOM.ts" />
@@ -1263,23 +1373,28 @@ var Heartland;
         var Ev = (function () {
             function Ev() {
             }
-            Ev.listen = function (eventName, callback) {
+            Ev.listen = function (node, eventName, callback) {
                 if (document.addEventListener) {
-                    document.addEventListener(eventName, callback, false);
+                    node.addEventListener(eventName, callback, false);
                 }
                 else {
-                    document.documentElement.attachEvent('onpropertychange', function (e) {
-                        if (e.propertyName === eventName) {
-                            callback(e);
-                        }
-                    });
+                    if (node === document) {
+                        document.documentElement.attachEvent('onpropertychange', function (e) {
+                            if (e.propertyName === eventName) {
+                                callback(e);
+                            }
+                        });
+                    }
+                    else {
+                        node.attachEvent('on' + eventName, callback);
+                    }
                 }
             };
-            Ev.trigger = function (eventName) {
+            Ev.trigger = function (node, eventName) {
                 if (document.createEvent) {
                     var event = document.createEvent('Event');
                     event.initEvent(eventName, true, true);
-                    document.dispatchEvent(event);
+                    node.dispatchEvent(event);
                 }
                 else {
                     document.documentElement[eventName]++;
@@ -1320,7 +1435,7 @@ var Heartland;
                 node.addEventListener(event, callback, false);
             }
             else {
-                Ev.listen(event, callback);
+                Ev.listen(node, event, callback);
             }
         }
         Events.addHandler = addHandler;
@@ -1367,7 +1482,7 @@ var Heartland;
                 target.dispatchEvent(event);
             }
             else {
-                Ev.trigger(name);
+                Ev.trigger(target, name);
             }
         }
         Events.trigger = trigger;
@@ -1420,7 +1535,8 @@ var Heartland;
                         if (document.getElementById('heartland-field') &&
                             document.getElementById('cardCvv') &&
                             document.getElementById('cardExpiration')) {
-                            tokenizeIframe(hps, document.getElementById('publicKey').getAttribute('value'));
+                            var pkey = document.getElementById('publicKey');
+                            tokenizeIframe(hps, (pkey ? pkey.getAttribute('value') : ''));
                         }
                         break;
                     case 'getFieldData':
@@ -1478,7 +1594,8 @@ var Heartland;
             card.cvv = cvvElement ? cvvElement.value : '';
             card.exp = expElement;
             if (card.exp) {
-                var cardExpSplit = card.exp.value.split('/');
+                var formatter = new Heartland.Formatter.Expiration();
+                var cardExpSplit = formatter.format(card.exp.value, true).split('/');
                 card.expMonth = cardExpSplit[0];
                 card.expYear = cardExpSplit[1];
                 card.exp = undefined;
@@ -1488,12 +1605,12 @@ var Heartland;
                 card.expYear = document.getElementById('heartland-expiration-year').value;
             }
             hps.tokenize({
-                cardCvv: card.cvv,
-                cardExpMonth: card.expMonth,
-                cardExpYear: card.expYear,
-                cardNumber: card.number,
+                cardCvv: card.cvv ? card.cvv : '',
+                cardExpMonth: card.expMonth ? card.expMonth : '',
+                cardExpYear: card.expYear ? card.expYear : '',
+                cardNumber: card.number ? card.number : '',
                 error: tokenResponse('onTokenError'),
-                publicKey: publicKey,
+                publicKey: publicKey ? publicKey : '',
                 success: tokenResponse('onTokenSuccess'),
                 type: 'pan'
             });
@@ -1518,11 +1635,27 @@ var Heartland;
          *
          * Parses a credit card number to obtain the card type/brand.
          *
-         * @param {string} number
+         * @param {string} tokenizationType
+         * @param {Heartland.Options} options
          */
-        function getCardType(number) {
-            var cardType = Heartland.Card.typeByNumber(number);
-            var type = '';
+        function getCardType(tokenizationType, options) {
+            var cardType;
+            var data = '';
+            var type = 'unknown';
+            switch (tokenizationType) {
+                case 'swipe':
+                    data = options.track;
+                    cardType = Heartland.Card.typeByTrack(data);
+                    break;
+                case 'encrypted':
+                    data = options.track;
+                    cardType = Heartland.Card.typeByTrack(data, true, options.trackNumber);
+                    break;
+                default:
+                    data = options.cardNumber;
+                    cardType = Heartland.Card.typeByNumber(data);
+                    break;
+            }
             if (cardType) {
                 type = cardType.code;
             }
@@ -1667,7 +1800,7 @@ var Heartland;
                     window.event.returnValue = false;
                 }
                 var fields = Heartland.Util.getFields(options.formId);
-                var cardType = Heartland.Util.getCardType(fields.number);
+                var cardType = Heartland.Util.getCardType(fields.number, 'pan');
                 options.cardNumber = fields.number;
                 options.cardExpMonth = fields.expMonth;
                 options.cardExpYear = fields.expYear;
@@ -1735,15 +1868,15 @@ var Heartland;
          * @param {Heartland.Options} options
          */
         function call(type, options) {
-            var number = options.cardNumber.replace(/^\s+|\s+$/g, '');
-            var lastfour = number.slice(-4);
-            var cardType = Heartland.Util.getCardType(number);
+            var cardType = Heartland.Util.getCardType(type, options);
             var params = Heartland.Util.getParams(type, options);
             jsonp(options.gatewayUrl + params, function (data) {
                 if (data.error) {
                     Heartland.Util.throwError(options, data);
                 }
                 else {
+                    var card = data.card || data.encryptedcard;
+                    var lastfour = card.number.slice(-4);
                     data.last_four = lastfour;
                     data.card_type = cardType;
                     data.exp_month = options.cardExpMonth;
@@ -2256,7 +2389,7 @@ var Heartland;
                         var i;
                         var field;
                         for (i in hps.frames) {
-                            if (['submit', 'cardNumber'].indexOf(i) !== -1) {
+                            if ('submit' === i || 'cardNumber' === i) {
                                 continue;
                             }
                             field = hps.frames[i];
@@ -2282,6 +2415,12 @@ var Heartland;
                             break;
                         }
                         options.onEvent(data.event);
+                        break;
+                    case 'error':
+                        if (!options.onError) {
+                            break;
+                        }
+                        options.onError(data);
                         break;
                 }
             }, '*');
@@ -2345,13 +2484,18 @@ var Heartland;
                 Heartland.Events.addHandler(target, event, function (e) {
                     var field = document.getElementById('heartland-field');
                     var classes = [];
+                    var data = {};
                     if (field.className !== '') {
                         classes = field.className.split(' ');
+                    }
+                    if (e.keyCode) {
+                        data.keyCode = e.keyCode;
                     }
                     hps.Messages.post({
                         action: 'fieldEvent',
                         event: {
                             classes: classes,
+                            data: data,
                             source: window.name,
                             type: e.type
                         }
@@ -2476,7 +2620,7 @@ var Heartland;
             this.configureFieldIframe(options);
             Heartland.Events.addHandler('heartland-field', 'click', (function (hps) {
                 return function (e) {
-                    e.preventDefault();
+                    e.preventDefault ? e.preventDefault() : (e.returnValue = false);
                     hps.Messages.post({ action: 'requestTokenize' }, 'parent');
                 };
             }(this)));
@@ -2501,6 +2645,20 @@ var Heartland;
                 name: 'parent',
                 url: decodeURIComponent(split.join(':').replace(/^:/, ''))
             };
+            window.onerror = (function (hps) {
+                return function (errorMsg, url, lineNumber, column, errorObj) {
+                    hps.Messages.post({
+                        action: 'error',
+                        data: {
+                            column: column,
+                            errorMsg: errorMsg,
+                            lineNumber: lineNumber,
+                            url: url
+                        }
+                    }, 'parent');
+                    return true;
+                };
+            }(this));
             this.loadHandler = (function (hps) {
                 return function () {
                     Heartland.DOM.resizeFrame(hps);
