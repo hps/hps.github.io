@@ -8,6 +8,23 @@ Heartland SDK Documentation
 - RubyGems (`gem`)
 - Build tools for native gems
 
+If you do not have Ruby installed on your system, follow these instructions:
+
+```bash
+# Mac OS
+$ brew install ruby
+```
+
+```batch
+REM Windows
+
+C:\docs> @powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))" && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin
+C:\docs> choco install ruby -v 2.2.4
+C:\docs> choco install ruby2.devkit
+```
+
+After installation, open a new terminal/command window to load any `PATH` changes.
+
 ## Build
 
 #### *nix systems:

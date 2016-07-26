@@ -1,5 +1,14 @@
+---
+title: Recurring Payments
+permalink: /recurring-payments/
+layout: default
+---
+
 # Recurring Payments
- > Create a Customer
+
+Securesubmit allows you to easily setup reoccuring payments on a tokenized credit card.
+
+> Create a Customer
 
 {% highlight csharp %}
  var newCustomer = new HpsPayPlanCustomer
@@ -52,10 +61,19 @@ new_customer.country = 'USA'
 new_customer.customer_status = HpsPayPlanCustomerStatus.ACTIVE
 {% endhighlight %}
 
-Securesubmit allows you to easily setup reoccuring payments on a tokenized credit card.
+{% highlight ruby %}
+# coming soon
+{% endhighlight %}
+
+{% highlight js %}
+// coming soon
+{% endhighlight %}
 
 ## Creating a Payment Method for a Customer
- Create Payment Method
+
+Follow the example below to create a new Payment Method for a customer.The object payPlanService was defined in the customer creation example code above.
+
+> Create Payment Method
 
 {% highlight csharp %}
 var paymentMethod = new HpsPayPlanPaymentMethod
@@ -103,26 +121,36 @@ payment_method.expiration_date = '0120'
 payment_method.country = 'USA'
 {% endhighlight %}
 
-Follow the example below to create a new Payment Method for a customer.The object payPlanService was defined in the customer creation example code above.
+{% highlight ruby %}
+# coming soon
+{% endhighlight %}
+
+{% highlight js %}
+// coming soon
+{% endhighlight %}
 
 ## Create a Recurring Plan for a Payment Method
+
+Use the following example to create a new subscription plan for a given Payment Method.
+The objects payPlanService and paymentMethod were defined in earlier example code.
+
 > Create Payment Method
 
 {% highlight csharp %}
 var schedule = new HpsPayPlanSchedule
 {
-        ScheduleIdentifier = Guid.NewGuid().ToString(),    
-        CustomerKey = paymentMethod.CustomerKey,
-        PaymentMethodKey = _paymentMethod.PaymentMethodKey,
-        SubtotalAmount = new HpsPayPlanAmount("100"),
-        StartDate = date,
-        Frequency = HpsPayPlanScheduleFrequency.Weekly,
-        Duration = HpsPayPlanScheduleDuration.LimitedNumber,
-        NumberOfPayments = 3,
-        ReprocessingCount = 2,
-        EmailReceipt = "Never",
-        EmailAdvanceNotice = "No",
-        ScheduleStatus = HpsPayPlanScheduleStatus.Active
+    ScheduleIdentifier = Guid.NewGuid().ToString(),
+    CustomerKey = paymentMethod.CustomerKey,
+    PaymentMethodKey = _paymentMethod.PaymentMethodKey,
+    SubtotalAmount = new HpsPayPlanAmount("100"),
+    StartDate = date,
+    Frequency = HpsPayPlanScheduleFrequency.Weekly,
+    Duration = HpsPayPlanScheduleDuration.LimitedNumber,
+    NumberOfPayments = 3,
+    ReprocessingCount = 2,
+    EmailReceipt = "Never",
+    EmailAdvanceNotice = "No",
+    ScheduleStatus = HpsPayPlanScheduleStatus.Active
 };
 var returnedSchedule = payPlanService.AddSchedule( schedule );
 var scheduleKey = returnedSchedule.ScheduleKey;
@@ -167,7 +195,7 @@ schedule.setEmailAdvanceNotice("No");
 schedule.setScheduleStatus(HpsPayPlanScheduleStatus.ACTIVE);
 {% endhighlight %}
 
-{% highlight ruby %}
+{% highlight python %}
 schedule = HpsPayPlanSchedule()
 
 schedule.schedule_identifier = self.get_schedule_identifier()
@@ -184,55 +212,48 @@ schedule.email_advance_notice = 'No'
 schedule.schedule_status = HpsPayPlanScheduleStatus.ACTIVE
 {% endhighlight %}
 
-Use the following example to create a new subscription plan for a given Payment Method.
-The objects payPlanService and paymentMethod were defined in earlier example code.
-{% highlight php %}
-<?php
-$id = date('Ymd').'-SecureSubmit-'.substr(str_shuffle($this->alphabet), 0, 10);
-$date = date('m30Y', strtotime(date('Y-m-d', strtotime(date('Y-m-d'))).'+1 month'));
-$newPaymentSchedule = new HpsPayPlanSchedule();
-$newPaymentSchedule->scheduleIdentifier = $id;
-$newPaymentSchedule->scheduleKey        = $this->paymentMethod->customerKey;
-$newPaymentSchedule->scheduleName   = $this->paymentMethod->paymentMethodKey;
-$newPaymentSchedule->deviceId     = array('value' => 100);
-$newPaymentSchedule->paymentMethodKey          = $date;
-$newPaymentSchedule->frequency          = HpsPayPlanScheduleFrequency::WEEKLY;
-$newPaymentSchedule->duration           = HpsPayPlanScheduleDuration::LIMITED_NUMBER;
-$newPaymentSchedule->numberOfPayments   = 3;
-$newPaymentSchedule->reprocessingCount  = 2;
-$newPaymentSchedule->emailReceipt       = 'Never';
-$newPaymentSchedule->emailAdvanceNotice = 'No';
-$newPaymentSchedule->scheduleStatus     = HpsPayPlanScheduleStatus::ACTIVE
+{% highlight ruby %}
+# coming soon
+{% endhighlight %}
+
+{% highlight js %}
+// coming soon
 {% endhighlight %}
 
 ### Failed Scheduled Transactions
+
 A schedule with a Failed status is an indication that the merchant must reach out to the customer to obtain new payment information.  PayPlan has an email notification that a merchant can opt in to receive a list of all schedules that failed during the nightly processing.
-If a card exceeds retries with non-fatal decline codes, then the schedule status changes to Failed but the payment status remains Active.
-This email notification is based on emailReceipt and emailAdvanceNotice 
+If a card exceeds retries with non-fatal decline codes, then the schedule status changes to Failed but the payment status remains Active. This email notification is based on emailReceipt and emailAdvanceNotice.
 
 #### Expired
+
 There is logic in place for recurring billing; it allows us to drop the expiration date on a card if it is less than current MMYYYY and it’s a recurring billing transaction. Eventually these will decline and/or trigger a fatal error. -below-
 
 #### Declined
+
 If a card is declined when processing a schedule, the “Failure Count” field is incremented.  If the Failure Count exceeds the reprocessing count, then the schedule status is also updated to ‘Failed’.  Each subsequent try is aproximately 24 hours after.
 
 #### Communication Failures
-If there is a communication failure, the schedule will fall into an error queue and no updates will be made.  Any schedule in the error queue is manually reviewed the next business day.  This is exceptionally rare and we do not typically provide any information to a merchant when an instance occurs.  
 
+If there is a communication failure, the schedule will fall into an error queue and no updates will be made.  Any schedule in the error queue is manually reviewed the next business day.  This is exceptionally rare and we do not typically provide any information to a merchant when an instance occurs.
 
-#### Other fatal errors 
-·         Invalid
-·         Expired
-·         Lost/Stolen
-·         Revoked
+#### Other fatal errors
+
+- Invalid
+- Expired
+- Lost/Stolen
+- Revoked
+
 A payment status can be set to something other than Active/Inactive only by the “fatal” response codes from an issuer during schedule processing; a one-time transaction does not change a payment method status.
 For example, if we process a schedule with a card and the issuer returns lost/stolen, then the schedule status changes to failed and the payment status changes to Lost/Stolen.
 If a card exceeds retries with non-fatal decline codes, then the schedule status changes to Failed but the payment status remains Active.
 
 Once the payment method is updated an edit can be performed to restart the schedule.
 
-
 ## Find Customers
+
+You can find customers associated with a given payment method using this method call.
+
 > Find Customers
 
 {% highlight csharp %}
@@ -289,12 +310,41 @@ results = self.service.page(1, 0).find_all_customers()
 results = self.service.find_all_customers({'customerIdentifier': 'SecureSubmit'})
 {% endhighlight %}
 
-You can find customers associated with a given payment method using this method call.
+{% highlight ruby %}
+# coming soon
+{% endhighlight %}
 
+{% highlight js %}
+// coming soon
+{% endhighlight %}
 
 ## Edit Schedule
-> Edit Schedule
 
+### Conditional Parameters
+
+scheduleStarted returns true if at least one transaction in the schedule has processed even if it has declined. The PHP-SDK will drop illegally passed fields during the edit call. More complete code examples can be found in the SDK
+
+#### scheduleStarted = False
+
+The following fields may only be edited when the schedule has not started processing
+
+Parameter | Description
+--------- | -----------
+scheduleIdentifier | String 50 character max
+startDate | date in DDMMYYYY format
+frequency | Weekly,Bi-Weekly,Semi-Monthly,Monthly,Bi-Monthly,Quarterly,Semi-Annually,Annually
+duration | Ongoing,Limited,Number,End Date
+
+#### scheduleStarted = true
+
+Once the schedule has started processing then the following field becomes editable
+
+Parameter | Description
+--------- | -----------
+NextProcessingDate |  date in DDMMYYYY format
+cancellationDate | date in DDMMYYYY format
+
+> Edit Schedule
 
 {% highlight php %}
 <?php
@@ -309,26 +359,22 @@ $schedule->frequency            = 'Monthly';
 $schedule->duration             = 'Ongoing';
 {% endhighlight %}
 
+{% highlight csharp %}
+// coming soon
+{% endhighlight %}
 
-Conditional Parameters
-scheduleStarted returns true if at least one transaction in the schedule has processed even if it has declined. The PHP-SDK will drop illegally passed fields during the edit call. More complete code examples can be found in the SDK
+{% highlight java %}
+// coming soon
+{% endhighlight %}
 
+{% highlight python %}
+# coming soon
+{% endhighlight %}
 
-### scheduleStarted = False
-The following fields may only be edited when the schedule has not started processing
-Parameter | Description
---------- | -----------
-scheduleIdentifier | String 50 character max
-startDate | date in DDMMYYYY format
-frequency | Weekly,Bi-Weekly,Semi-Monthly,Monthly,Bi-Monthly,Quarterly,Semi-Annually,Annually
-duration | Ongoing,Limited,Number,End Date
+{% highlight ruby %}
+# coming soon
+{% endhighlight %}
 
-### scheduleStarted = true
-Once the schedule has started processing then the following field becomes editable
-Parameter | Description
---------- | -----------
-NextProcessingDate |  date in DDMMYYYY format
-cancellationDate | date in DDMMYYYY format
-
-
-
+{% highlight js %}
+// coming soon
+{% endhighlight %}
