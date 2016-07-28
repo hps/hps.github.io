@@ -1,6 +1,35 @@
+---
+title: Reporting
+permalink: /reporting/
+layout: default
+---
+
 # Reporting
 
 ## List Transactions
+
+Gets a list of transaction summaries between a set of dates and filtered if specified.
+
+### Parameters
+
+Parameter | Description
+--------- | -----------
+Start | Start date
+End | End date
+Filter By | Filter the result set by transaction type
+
+### Returns: HpsReportTransactionSummaryArray
+
+Properties | Description
+--------- | -----------
+Amount | Amount of the transaction
+SettlementAmount | Settlement amount of transaction
+OriginalTransactionId | If the transaction performed an action on a previous transaction, this field records the transaction that was acted upon.
+MaskedCardNumber | Shows card number with astericks in all but last 4 digits
+TransactionType | The type of transaction such as charge, refund, void etc
+TransactionUtcDate | Date of transaction
+Exceptions | Contains a set of any exceptions that might have been thrown as a result of the transaction
+
 > List Transactions
 
 {% highlight csharp %}
@@ -40,30 +69,27 @@ creditService.list(startDate.toISOString(), endDate.toISOString(), null, functio
 });
 {% endhighlight %}
 
-Gets a list of transaction summaries between a set of dates and filtered if specified.
+## Get a Transaction
 
-### Parameters
+Gets an HPS Transaction given a Transaction ID.
 
-Parameter | Description
---------- | -----------
-Start | Start date
-End | End date
-Filter By | Filter the result set by transaction type
-
-Returns: HpsReportTransactionSummaryArray
+### Returns: HpsReportTransactionDetails
 
 Properties | Description
 --------- | -----------
-Amount | Amount of the transaction
-SettlementAmount : Settlement amount of transaction
-OriginalTransactionId : If the transaction performed an action on a previous transaction, this field records the transaction that was acted upon.
+IssuerTransactionId | Card issuer transaction id
+IssuerValidationCode | Card issuer transaction code
+OriginalTransactionId | If the transaction performed an action on a previous transaction, this field records the transaction that was acted upon.
 MaskedCardNumber | Shows card number with astericks in all but last 4 digits
+SettlementAmount | Settlement amount of transaction
 TransactionType | The type of transaction such as charge, refund, void etc
 TransactionUtcDate | Date of transaction
 Exceptions | Contains a set of any exceptions that might have been thrown as a result of the transaction
+Memo | a free-form field (for Merchant reporting/record-keeping purposes only)
+InvoiceNumber | This will not be used at settlement. (for Merchant reporting/record-keeping purposes only).
+CustomerId | This is intended to be the customer identification. (for Merchant reporting/record-keeping purposes only).
+TransactionStatus | String returning the status of the transaction
 
-
-## Get a Transaction
 > Get Transaction
 
 {% highlight csharp %}
@@ -114,22 +140,3 @@ creditService.list(startDate.toISOString(), endDate.toISOString(), null, functio
   });
 });
 {% endhighlight %}
-
-Gets an HPS Transaction given a Transaction ID.
-
-Returns: HpsReportTransactionDetails
-
-Properties | Description
---------- | -----------
-IssuerTransactionId | Card issuer transaction id
-IssuerValidationCode | Card issuer transaction code
-OriginalTransactionId | If the transaction performed an action on a previous transaction, this field records the transaction that was acted upon.
-MaskedCardNumber | Shows card number with astericks in all but last 4 digits
-SettlementAmount | Settlement amount of transaction
-TransactionType | The type of transaction such as charge, refund, void etc
-TransactionUtcDate | Date of transaction
-Exceptions | Contains a set of any exceptions that might have been thrown as a result of the transaction
-Memo | a free-form field (for Merchant reporting/record-keeping purposes only)
-InvoiceNumber | This will not be used at settlement. (for Merchant reporting/record-keeping purposes only).
-CustomerId | This is intended to be the customer identification. (for Merchant reporting/record-keeping purposes only).
-TransactionStatus | String returning the status of the transaction

@@ -27,17 +27,17 @@ under the License.
 // GENERAL STUFF
 ////////////////////////////////////////////////////////////////////////////////
 
-html, body {
-  color: $main-text;
-  padding: 0;
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  @extend %default-font;
-  background-color: $main-bg;
-  height: 100%;
-  -webkit-text-size-adjust: none; /* Never autoresize text */
-}
+// html, body {
+//   color: $main-text;
+//   padding: 0;
+//   margin: 0;
+//   -webkit-font-smoothing: antialiased;
+//   -moz-osx-font-smoothing: grayscale;
+//   @extend %default-font;
+//   background-color: $main-bg;
+//   height: 100%;
+//   -webkit-text-size-adjust: none; /* Never autoresize text */
+// }
 
 a {
    color: #3989e3;
@@ -65,11 +65,22 @@ a {
     $nav-subitem-bg;
 }
 
+.tocify {
+  ul {
+    padding: 0;
+  }
+
+  &>.tocify-header {
+    margin: 0;
+    padding: 0;
+  }
+}
+
 .tocify-wrapper {
   transition: left 0.3s ease-in-out;
   overflow-y: auto;
   overflow-x: hidden;
-  position: fixed;
+  // position: fixed;
   z-index: 30;
   top: 0;
   left: 0;
@@ -282,7 +293,7 @@ a {
 ////////////////////////////////////////////////////////////////////////////////
 
 .page-wrapper {
-  margin-left: $nav-width;
+  // margin-left: $nav-width;
   position: relative;
   z-index: 10;
   background-color: $main-bg;
@@ -296,7 +307,7 @@ a {
   // I know, it's hackish, but it's the simplist way to make the left
   // half of the content always this background color.
   .dark-box {
-    width: $examples-width;
+    // width: $examples-width;
     background-color: $examples-bg;
     position: absolute;
     right: 0;
@@ -351,7 +362,7 @@ a {
   // to place content above the dark box
   position: relative;
   z-index: 30;
-   border-left: 1px #ccc solid;
+  //  border-left: 1px #ccc solid;
 
   &:after {
     content: '';
@@ -360,7 +371,7 @@ a {
   }
 
   &>h1, &>h2, &>h3, &>h4, &>h5, &>h6, &>p, &>table, &>ul, &>ol, &>aside, &>dl {
-    margin-right: $examples-width;
+    // margin-right: $examples-width;
     padding: 0 $main-padding;
     box-sizing: border-box;
     display: block;
@@ -385,7 +396,7 @@ a {
     padding-bottom: 0.5em;
     margin-bottom: $h1-margin-bottom;
     margin-top: 2em;
-    border-top: 1px solid #ddd;
+    // border-top: 1px solid #ddd;
     font-weight: 600;
 
      &:after {
@@ -410,7 +421,7 @@ a {
     font-size: 20px;
     margin-top: 4em;
     margin-bottom: 0;
-    border-top: 1px solid #ccc;
+    // border-top: 1px solid #ccc;
     padding-top: 1.2em;
     padding-bottom: 1.2em;
     background-image: linear-gradient(to bottom, rgba(#fff, 0.4), rgba(#fff, 0));
@@ -558,45 +569,45 @@ a {
 // This is all the stuff that appears in the right half of the page
 
 .content {
-  pre, blockquote {
-    background-color: $code-bg;
-    color: #fff;
-
-    padding: 2em $main-padding;
-    margin: 0;
-    width: $examples-width;
-
-    float:right;
-    clear:right;
-
-    box-sizing: border-box;
-    // @include text-shadow(0px 1px 2px rgba(0,0,0,0.4));
-
-    @extend %right-col;
-
-    &>p { margin: 0; }
-
-    a {
-      color: #fff;
-      text-decoration: none;
-      border-bottom: dashed 1px #ccc;
-    }
-  }
-
-  pre {
-    @extend %code-font;
-  }
-
-  blockquote {
-    &>p {
-      background-color: $code-annotation-bg;
-      border-radius: 5px;
-      padding: $code-annotation-padding;
-      color: #ccc;
-      border-top: 1px solid #000;
-      border-bottom: 1px solid #404040;
-    }
-  }
+  // pre, blockquote {
+  //   background-color: $code-bg;
+  //   color: #fff;
+  //
+  //   padding: 2em $main-padding;
+  //   margin: 0;
+  //   width: $examples-width;
+  //
+  //   float:right;
+  //   clear:right;
+  //
+  //   box-sizing: border-box;
+  //   // @include text-shadow(0px 1px 2px rgba(0,0,0,0.4));
+  //
+  //   @extend %right-col;
+  //
+  //   &>p { margin: 0; }
+  //
+  //   a {
+  //     color: #fff;
+  //     text-decoration: none;
+  //     border-bottom: dashed 1px #ccc;
+  //   }
+  // }
+  //
+  // pre {
+  //   @extend %code-font;
+  // }
+  //
+  // blockquote {
+  //   &>p {
+  //     background-color: $code-annotation-bg;
+  //     border-radius: 5px;
+  //     padding: $code-annotation-padding;
+  //     color: #ccc;
+  //     border-top: 1px solid #000;
+  //     border-bottom: 1px solid #404040;
+  //   }
+  // }
 }
 
 

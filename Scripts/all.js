@@ -207,9 +207,9 @@ under the License.
     global.toc.calculateHeights();
 
     // scroll to the new location of the position
-    if ($(window.location.hash).get(0)) {
-      $(window.location.hash).get(0).scrollIntoView(true);
-    }
+    //if ($(window.location.hash).get(0)) {
+      //$(window.location.hash).get(0).scrollIntoView(true);
+    //}
   }
 
   // parseURL and stringifyURL are from https://github.com/sindresorhus/query-string
@@ -289,10 +289,10 @@ under the License.
   // if a button is clicked, add the state to the history
   function pushURL(language) {
     if (!history) { return; }
-    var hash = window.location.hash;
-    if (hash) {
-      hash = hash.replace(/^#+/, '');
-    }
+    //var hash = window.location.hash;
+    //if (hash) {
+    //  hash = hash.replace(/^#+/, '');
+    //}
     history.pushState({}, '', '?' + generateNewQueryString(language) + '#' + hash);
 
     // save language as next default
@@ -3058,7 +3058,7 @@ jQuery.fn.highlight = function (words, options) {
 
             // **selectors**: Accepts an Array of Strings: Any jQuery selectors
             // The element's used to generate the table of contents.  The order is very important since it will determine the table of content's nesting structure
-            selectors: "h1, h2, h3",
+            selectors: "h2, h3",
 
             // **showAndHide**: Accepts a boolean: true or false
             // Used to determine if elements should be shown and hidden
@@ -4061,7 +4061,7 @@ jQuery.fn.highlight = function (words, options) {
 
   var makeToc = function() {
     global.toc = $("#toc").tocify({
-      selectors: 'h1, h2',
+      selectors: 'h1,h2',
       extendPage: false,
       theme: 'none',
       smoothScroll: false,

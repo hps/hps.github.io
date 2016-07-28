@@ -1,4 +1,14 @@
+---
+title: Authentication
+permalink: /authentication/
+layout: default
+---
+
 # Authentication
+
+Authentication with Heartland is simple: you will pass your Secret API Key (found on your Account Settings screen) to the SDK via your configuration.
+
+> Create an authentication object
 
 {% highlight csharp %}
 var config = new HpsServicesConfig()  {  SecretApiKey = "secret api key"  };
@@ -21,7 +31,7 @@ HpsChargeService chargeService = new HpsChargeService(config);
 {% highlight ruby %}
 Hps.configure do |config|
     config.secret_api_key = "secret api key"
-end  
+end
 
 charge_service = Hps::HpsChargeService.new
 {% endhighlight %}
@@ -33,4 +43,6 @@ config.secret_api_key = 'secret api key'
 credit_service = HpsCreditService(config)
 {% endhighlight %}
 
-Authentication with Heartland is simple: you will pass your Secret API Key (found on your Account Settings screen) to the SDK via your configuration.
+{% highlight js %}
+// coming soon
+{% endhighlight %}
