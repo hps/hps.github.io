@@ -3,7 +3,7 @@ title: Heartland API Documentation
 email: EntApp_DevPortal@e-hps.com
 github_username: hps
 url: 'https://hps.github.io'
-base_url: ''
+baseurl: '/Documentation'
 
 # slate settings
 slate:

@@ -1,17 +1,32 @@
-- key: php
-  label: PHP
+server:
+  - key: php
+    label: PHP
 
-- key: csharp
-  label: .Net
+  - key: csharp
+    label: .Net
 
-- key: java
-  label: Java
+  - key: java
+    label: Java
 
-- key: ruby
-  label: Ruby
+  - key: ruby
+    label: Ruby
 
-- key: python
-  label: Python
+  - key: python
+    label: Python
 
-- key: js
-  label: nodeJS
+  - key: js
+    label: nodeJS
+
+client:
+  - key: js
+    label: Javascript
+
+  - key: java
+    label: Java
+
+  - key: objc
+    label: ObjC
+
+  - key: swift
+    label: Swift
+

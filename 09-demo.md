@@ -11,22 +11,25 @@ layout: default
 
 Take a look at the following examples:
 
-<table>
-  <thead>
-    <tr>
-      <th width="50%">Example A</th>
-      <th>Example B</th>
-    </tr>
-  </thead>
-  <tr>
-    <td>
-      {% include samples/standard.html %}
-    </td>
-    <td>
-      {% include samples/iframes.html %}
-    </td>
-  </tr>
-</table>
+<div class="row">
+
+	<div class="col-sm-6">
+
+		<p><strong>Example A</strong></p>
+
+		{% include samples/standard.html %}
+
+	</div>
+
+	<div class="col-sm-6">
+
+		<p><strong>Example B</strong></p>
+
+		{% include samples/iframes.html %}
+
+	</div>
+
+</div>
 
 <a id="standard-code-sample"></a>
 

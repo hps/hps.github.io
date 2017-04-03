@@ -1,15 +1,25 @@
+
 <!-- The Payment Form -->
 <form id="standard" action="" method="GET">
-  <dt><label for="standardCardNumber">Card Number:</label></dt>
-  <dd><input type="tel" id="standardCardNumber" placeholder="•••• •••• •••• ••••" /></dd>
-  <dt><label for="standardCardExpiration">Card Expiration:</label></dt>
-  <dd><input type="tel" id="standardCardExpiration" placeholder="MM / YYYY" /></dd>
-  <dt><label for="standardCardCvv">Card CVV:</label></dt>
-  <dd><input type="tel" id="standardCardCvv" placeholder="CVV" /></dd>
-  <br />
-  <input type="submit" value="Submit" />
-  <button id="standardShowCode" type="button">Show Code</button>
+	<div class="form-group">
+		<label for="standardCardNumber">Card Number:</label>
+		<input class="form-control" type="tel" id="standardCardNumber" placeholder="•••• •••• •••• ••••" />
+	</div>
+	<div class="form-group">
+		<label for="standardCardExpiration">Card Expiration:</label>
+		<input class="form-control" type="tel" id="standardCardExpiration" placeholder="MM / YYYY" />
+	</div>
+	<div class="form-group">
+		<label for="standardCardCvv">Card CVV:</label>
+		<input class="form-control" type="tel" id="standardCardCvv" placeholder="CVV" />
+	</div>
+  
+	<input type="submit" class="btn btn-primary" value="Submit" />
+	
+	<p><button class="btn btn-xs btn-link" id="standardShowCode" type="button">Show Code</button></p>
 </form>
+
+
 <!-- The SecureSubmit Javascript Library -->
 <script type="text/javascript" src="https://api2.heartlandportico.com/SecureSubmit.v1/token/2.1/securesubmit.js"></script>
 <!-- The Integration Code -->

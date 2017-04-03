@@ -289,10 +289,10 @@ under the License.
   // if a button is clicked, add the state to the history
   function pushURL(language) {
     if (!history) { return; }
-    //var hash = window.location.hash;
-    //if (hash) {
-    //  hash = hash.replace(/^#+/, '');
-    //}
+    var hash = window.location.hash;
+    if (hash) {
+      hash = hash.replace(/^#+/, '');
+    }
     history.pushState({}, '', '?' + generateNewQueryString(language) + '#' + hash);
 
     // save language as next default
@@ -323,7 +323,7 @@ under the License.
   $(function() {
     $(".lang-selector a").on("click", function() {
       var language = $(this).data("language-name");
-      pushURL(language);
+      //pushURL(language);
       activateLanguage(language);
       return false;
     });
@@ -3058,7 +3058,7 @@ jQuery.fn.highlight = function (words, options) {
 
             // **selectors**: Accepts an Array of Strings: Any jQuery selectors
             // The element's used to generate the table of contents.  The order is very important since it will determine the table of content's nesting structure
-            selectors: "h2, h3",
+            selectors: "h1, h2, h3",
 
             // **showAndHide**: Accepts a boolean: true or false
             // Used to determine if elements should be shown and hidden

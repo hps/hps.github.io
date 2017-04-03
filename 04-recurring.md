@@ -6,59 +6,108 @@ layout: default
 
 # Recurring Payments
 
-Securesubmit allows you to easily setup reoccuring payments on a tokenized credit card.
+Heartland's recurring product, PayPlan, allows you to easily setup reccuring payments on a tokenized credit card.
 
-> Create a Customer
+<aside class="notice">
+Recurring payments with PayPlan are not enabled by default. You must contact your Heartland Representitive to request this functionality on your account.
+</aside>
+
+## Create a PayPlan service object
+
+> Create a service object
 
 {% highlight csharp %}
- var newCustomer = new HpsPayPlanCustomer
-{
-	CustomerStatus = HpsPayPlanCustomerStatus.Active,
-	CustomerIdentifier = "ExampleCo-1234",
-	FirstName = "Bill",
-	LastName = "Johnson",
-	Company = "Heartland Payment Systems",
-	Country = "USA"
+var config = new HpsServicesConfig {
+    SecretApiKey = "<<your api key goes here>>"
 };
-var serviceConfig = new HpsServicesConfig() { SecretApiKey = "<< your api key goes here>>" };
-var payPlanService = new HpsPayPlanService( serviceConfig );
-var customer = payPlanService.AddCustomer( newCustomer );
+var payPlanService = new HpsPayPlanService(serviceConfig);
 {% endhighlight %}
 
 {% highlight php %}
 <?php
-$id = date('Ymd').'-SecureSubmit-'.substr(str_shuffle($this->alphabet), 0, 10);
+$config = new HpsServicesConfig();
+$config->secretApiKey =  "<<your api key goes here>>";
+$payPlanService = new HpsPayPlanService($config);
+{% endhighlight %}
+
+{% highlight java %}
+HpsServicesConfig config = new HpsServicesConfig();
+config.setSecretAPIKey("<<your api key goes here>>");
+HpsPayPlanService payPlanService = new HpsPayPlanService(config);
+{% endhighlight %}
+
+{% highlight ruby %}
+# coming soon
+{% endhighlight %}
+
+{% highlight python %}
+config = HpsServicesConfig()
+config.secret_api_key = '<<your api key goes here>>'
+payplan_service = HpsPayPlanService(config)
+{% endhighlight %}
+
+{% highlight js %}
+var config = {
+    secretApiKey: "skapi_cert_MTyMAQBiHVEAewvIzXVFcmUd2UcyBge_eCpaASUp0A",
+    serviceUri: "https://cert.api2.heartlandportico.com/Portico.PayPlan.v2"
+};
+var payPlanService = new HpsPayPlanService(config);
+{% endhighlight %}
+
+## Create a Recurring Customer
+
+> Create a Customer
+
+{% highlight csharp %}
+var newCustomer = new HpsPayPlanCustomer
+{
+    CustomerStatus = HpsPayPlanCustomerStatus.Active,
+    CustomerIdentifier = generateCustomerId(),
+    FirstName = "Bill",
+    LastName = "Johnson",
+    Company = "Heartland Payment Systems",
+    Country = "USA"
+};
+
+var customer = payPlanService.AddCustomer(newCustomer);
+{% endhighlight %}
+
+{% highlight php %}
+<?php
 $newCustomer = new HpsPayPlanCustomer();
-$newCustomer->customerIdentifier = $id;
+$newCustomer->customerIdentifier = generateCustomerId();
 $newCustomer->firstName          = 'Bill';
 $newCustomer->lastName           = 'Johnson';
 $newCustomer->company            = 'Heartland Payment Systems';
 $newCustomer->country            = 'USA';
 $newCustomer->customerStatus     = HpsPayPlanCustomerStatus::ACTIVE;
+
+$customer = $payPlanService->addCustomer($newCustomer);
 {% endhighlight %}
 
 {% highlight java %}
-String id = generateCustomerId();
-
 HpsPayPlanCustomer newCustomer = new HpsPayPlanCustomer();
 newCustomer.setCustomerStatus(HpsPayPlanCustomerStatus.ACTIVE);
-
-newCustomer.setCustomerIdentifier(id);
+newCustomer.setCustomerIdentifier(generateCustomerId());
 newCustomer.setFirstName("Bill");
 newCustomer.setLastName("Johnson");
 newCustomer.setCompany("Heartland Payment Systems");
 newCustomer.setCountry("USA");
 newCustomer.setCustomerStatus(HpsPayPlanCustomerStatus.ACTIVE);
+
+HpsPayPlanCustomer customer = payPlanService.addCustomer(newCustomer);
 {% endhighlight %}
 
 {% highlight python %}
 new_customer = HpsPayPlanCustomer()
-new_customer.customer_identifier = self.get_customer_identifier()
+new_customer.customer_identifier = get_customer_identifier()
 new_customer.first_name = 'Bill'
 new_customer.last_name = 'Johnson'
 new_customer.company = 'Heartland Payment Systems'
 new_customer.country = 'USA'
 new_customer.customer_status = HpsPayPlanCustomerStatus.ACTIVE
+
+customer = payplan_service.add_customer(new_customer)
 {% endhighlight %}
 
 {% highlight ruby %}
@@ -66,59 +115,83 @@ new_customer.customer_status = HpsPayPlanCustomerStatus.ACTIVE
 {% endhighlight %}
 
 {% highlight js %}
-// coming soon
+var newCustomer = {
+    customerIdentifier: getCustomerId(),
+    firstName: 'Bill',
+    lastName: 'Johnson',
+    company: 'Heartland Payment Systems',
+    country: 'USA',
+    customerStatus: HpsPayPlanCustomerStatus.Active
+};
+
+payPlanService.addCustomer(newCustomer, function (err, customer) {
+    // handle response
+});
 {% endhighlight %}
 
-## Creating a Payment Method for a Customer
+### Useful Enumerations
+
+Enumeration              | Constant
+------------------------ | --------
+HpsPayPlanCustomerStatus | Active
+                         | Inactive
+
+## Create a Payment Method for a Customer
 
 Follow the example below to create a new Payment Method for a customer.The object payPlanService was defined in the customer creation example code above.
 
 > Create Payment Method
 
 {% highlight csharp %}
-var paymentMethod = new HpsPayPlanPaymentMethod
+var newPaymentMethod = new HpsPayPlanPaymentMethod
 {
-    CustomerKey = _customer.CustomerKey,
+    CustomerKey = customer.CustomerKey,
     PaymentMethodType = HpsPayPlanPaymentMethodType.CreditCard,
-    NameOnAccount = string.Format("{0} {1}", _customer.FirstName, _customer.LastName),
+    NameOnAccount = string.Format("{0} {1}", customer.FirstName, customer.LastName),
     AccountNumber = "4111111111111111",
     ExpirationDate = "0120",
     Country = "USA"
 };
-var returnedPaymentMethod = payPlan.AddPaymentMethod( paymentMethod );
-var paymentMethodKey = returnedPaymentMethod.PaymentMethodKey;
+
+var paymentMethod = payPlan.AddPaymentMethod(newPaymentMethod);
 {% endhighlight %}
 
 {% highlight php %}
 <?php
 $newPaymentMethod = new HpsPayPlanPaymentMethod();
-$newPaymentMethod->customerKey    = $this->customer->customerKey;
+$newPaymentMethod->customerKey    = $customer->customerKey;
 $newPaymentMethod->nameOnAccount  = 'Bill Johnson';
 $newPaymentMethod->accountNumber  = 4111111111111111;
 $newPaymentMethod->expirationDate = '0120';
 $newPaymentMethod->country        = 'USA';
+
+$customer = $payPlanService->addPaymentMethod($newPaymentMethod);
 {% endhighlight %}
 
 {% highlight java %}
 HpsPayPlanPaymentMethod newMethod = new HpsPayPlanPaymentMethod();
 
-newMethod.setCustomerKey(this.customer.getCustomerKey());
+newMethod.setCustomerKey(customer.getCustomerKey());
 newMethod.setPaymentMethodType(HpsPayPlanPaymentMethodType.CREDIT_CARD);
-newMethod.setNameOnAccount(String.format("%s %s", this.customer.getFirstName(), this.customer.getLastName()));
+newMethod.setNameOnAccount(String.format("%s %s", customer.getFirstName(), customer.getLastName()));
 newMethod.setAccountNumber("4111111111111111");
 newMethod.setExpirationDate("0120");
 newMethod.setCountry("USA");
+
+HpsPayPlanPaymentMethod paymentMethod = payPlanService.addPaymentMethod(newMethod);
 {% endhighlight %}
 
 {% highlight python %}
-payment_method = HpsPayPlanPaymentMethod()
+new_payment_method = HpsPayPlanPaymentMethod()
 
-payment_method.customer_key = self.customer.customer_key
-payment_method.payment_method_type = HpsPayPlanPaymentMethodType.CREDIT_CARD
-payment_method.name_on_account = 'Bill Johnson'
-payment_method.account_number = 4111111111111111
-payment_method.expiration_date = '0120'
-payment_method.country = 'USA'
+new_payment_method.customer_key = customer.customer_key
+new_payment_method.payment_method_type = HpsPayPlanPaymentMethodType.CREDIT_CARD
+new_payment_method.name_on_account = 'Bill Johnson'
+new_payment_method.account_number = 4111111111111111
+new_payment_method.expiration_date = '0120'
+new_payment_method.country = 'USA'
+
+payment_method = payplan_service.add_payment_method(new_payment_method)
 {% endhighlight %}
 
 {% highlight ruby %}
@@ -126,8 +199,32 @@ payment_method.country = 'USA'
 {% endhighlight %}
 
 {% highlight js %}
-// coming soon
+var paymentMethod = {
+    customerKey: customer.customerKey,
+    paymentMethodType: HpsPayPlanPaymentMethodType.CreditCard,
+    nameOnAccount: 'Bill Johnson',
+    accountNumber: 4111111111111111,
+    expirationDate: '0120',
+    country: 'USA'
+};
+
+payPlanService.addPaymentMethod(newPaymentMethod, function (err, paymentMethod) {
+    // handle response
+});
 {% endhighlight %}
+
+### Useful Enumerations
+
+Enumeration                   | Constant
+----------------------------- | --------
+HpsPayPlanPaymentMethodStatus | Active
+                              | Inactive
+                              | Invalid
+                              | Revoked
+                              | Expired
+                              | LostStolen
+HpsPayPlanPaymentMethodType   | CreditCard
+                              | Ach
 
 ## Create a Recurring Plan for a Payment Method
 
@@ -137,13 +234,13 @@ The objects payPlanService and paymentMethod were defined in earlier example cod
 > Create Payment Method
 
 {% highlight csharp %}
-var schedule = new HpsPayPlanSchedule
+var newSchedule = new HpsPayPlanSchedule
 {
-    ScheduleIdentifier = Guid.NewGuid().ToString(),
+    ScheduleIdentifier = getScheduleId(),
     CustomerKey = paymentMethod.CustomerKey,
-    PaymentMethodKey = _paymentMethod.PaymentMethodKey,
+    PaymentMethodKey = paymentMethod.PaymentMethodKey,
     SubtotalAmount = new HpsPayPlanAmount("100"),
-    StartDate = date,
+    StartDate = getScheduleStartDate(),
     Frequency = HpsPayPlanScheduleFrequency.Weekly,
     Duration = HpsPayPlanScheduleDuration.LimitedNumber,
     NumberOfPayments = 3,
@@ -152,21 +249,18 @@ var schedule = new HpsPayPlanSchedule
     EmailAdvanceNotice = "No",
     ScheduleStatus = HpsPayPlanScheduleStatus.Active
 };
-var returnedSchedule = payPlanService.AddSchedule( schedule );
-var scheduleKey = returnedSchedule.ScheduleKey;
+
+var schedule = payPlanService.AddSchedule(newSchedule);
 {% endhighlight %}
 
 {% highlight php %}
 <?php
-$id = date('Ymd').'-SecureSubmit-'.substr(str_shuffle($this->alphabet), 0, 10);
-$date = date('m30Y', strtotime(date('Y-m-d', strtotime(date('Y-m-d'))).'+1 month'));
-
 $newPaymentSchedule = new HpsPayPlanSchedule();
-$newPaymentSchedule->scheduleIdentifier = $id;
-$newPaymentSchedule->customerKey        = $this->paymentMethod->customerKey;
-$newPaymentSchedule->paymentMethodKey   = $this->paymentMethod->paymentMethodKey;
+$newPaymentSchedule->scheduleIdentifier = getScheduleId();
+$newPaymentSchedule->customerKey        = $paymentMethod->customerKey;
+$newPaymentSchedule->paymentMethodKey   = $paymentMethod->paymentMethodKey;
 $newPaymentSchedule->subtotalAmount     = array('value' => 100);
-$newPaymentSchedule->startDate          = $date;
+$newPaymentSchedule->startDate          = getScheduleStartDate();
 $newPaymentSchedule->frequency          = HpsPayPlanScheduleFrequency::WEEKLY;
 $newPaymentSchedule->duration           = HpsPayPlanScheduleDuration::LIMITED_NUMBER;
 $newPaymentSchedule->numberOfPayments   = 3;
@@ -174,42 +268,45 @@ $newPaymentSchedule->reprocessingCount  = 2;
 $newPaymentSchedule->emailReceipt       = 'Never';
 $newPaymentSchedule->emailAdvanceNotice = 'No';
 $newPaymentSchedule->scheduleStatus     = HpsPayPlanScheduleStatus::ACTIVE
+
+$schedule = $payPlanService->addSchedule($newPaymentSchedule);
 {% endhighlight %}
 
 {% highlight java %}
-String id = this.generateScheduleId();
-String date = getLastDayOfMonth();
+HpsPayPlanSchedule newSchedule = new HpsPayPlanSchedule();
+newSchedule.setScheduleIdentifier(getScheduleId());
+newSchedule.setCustomerKey(paymentMethod.getCustomerKey());
+newSchedule.setPaymentMethodKey(paymentMethod.getPaymentMethodKey());
+newSchedule.setSubtotalAmount(new HpsPayPlanAmount("100"));
+newSchedule.setStartDate(getScheduleStartDate());
+newSchedule.setFrequency(HpsPayPlanScheduleFrequency.WEEKLY);
+newSchedule.setDuration(HpsPayPlanScheduleDuration.LIMITED_NUMBER);
+newSchedule.setNumberOfPayments(3);
+newSchedule.setReprocessingCount(2);
+newSchedule.setEmailReceipt("Never");
+newSchedule.setEmailAdvanceNotice("No");
+newSchedule.setScheduleStatus(HpsPayPlanScheduleStatus.ACTIVE);
 
-HpsPayPlanSchedule schedule = new HpsPayPlanSchedule();
-schedule.setScheduleIdentifier(id);
-schedule.setCustomerKey(this.paymentMethod.getCustomerKey());
-schedule.setPaymentMethodKey(this.paymentMethod.getPaymentMethodKey());
-schedule.setSubtotalAmount(new HpsPayPlanAmount("100"));
-schedule.setStartDate(date);
-schedule.setFrequency(HpsPayPlanScheduleFrequency.WEEKLY);
-schedule.setDuration(HpsPayPlanScheduleDuration.LIMITED_NUMBER);
-schedule.setNumberOfPayments(3);
-schedule.setReprocessingCount(2);
-schedule.setEmailReceipt("Never");
-schedule.setEmailAdvanceNotice("No");
-schedule.setScheduleStatus(HpsPayPlanScheduleStatus.ACTIVE);
+HpsPayPlanSchedule schedule = payPlanService.addSchedule(newSchedule);
 {% endhighlight %}
 
 {% highlight python %}
-schedule = HpsPayPlanSchedule()
+newSchedule = HpsPayPlanSchedule()
 
-schedule.schedule_identifier = self.get_schedule_identifier()
-schedule.customer_key = self.payment_method.customer_key
-schedule.payment_method_key = self.payment_method.payment_method_key
-schedule.subtotal_amount = HpsPayPlanAmount(100)
-schedule.start_date = self.last_day_of_the_month()
-schedule.frequency = HpsPayPlanScheduleFrequency.WEEKLY
-schedule.duration = HpsPayPlanScheduleDuration.LIMITED_NUMBER
-schedule.number_of_payments = 3
-schedule.reprocessing_count = 2
-schedule.email_receipt = 'Never'
-schedule.email_advance_notice = 'No'
-schedule.schedule_status = HpsPayPlanScheduleStatus.ACTIVE
+new_schedule.schedule_identifier = get_schedule_id()
+new_schedule.customer_key = payment_method.customer_key
+new_schedule.payment_method_key = payment_method.payment_method_key
+new_schedule.subtotal_amount = HpsPayPlanAmount(100)
+new_schedule.start_date = get_schedule_start_date()
+new_schedule.frequency = HpsPayPlanScheduleFrequency.WEEKLY
+new_schedule.duration = HpsPayPlanScheduleDuration.LIMITED_NUMBER
+new_schedule.number_of_payments = 3
+new_schedule.reprocessing_count = 2
+new_schedule.email_receipt = 'Never'
+new_schedule.email_advance_notice = 'No'
+new_schedule.schedule_status = HpsPayPlanScheduleStatus.ACTIVE
+
+schedule = payplan_service.add_schedule(schedule)
 {% endhighlight %}
 
 {% highlight ruby %}
@@ -217,8 +314,43 @@ schedule.schedule_status = HpsPayPlanScheduleStatus.ACTIVE
 {% endhighlight %}
 
 {% highlight js %}
-// coming soon
+var newSchedule = {
+    scheduleIdentifier: getScheduleId(),
+    customerKey: paymentMethod.customerKey,
+    paymentMethodKey: paymentMethod.paymentMethodKey,
+    subtotalAmount: HpsPayPlanAmount(100),
+    startDate: getScheduleStartDate(),
+    frequency: HpsPayPlanScheduleFrequency.Weekly,
+    duration: HpsPayPlanScheduleDuration.LimitedNumber,
+    numberOfPayments: 3,
+    reprocessingCount: 2,
+    emailReceipt: 'Never',
+    emailAdvanceNotice: 'No',
+    scheduleStatus: HpsPayPlanScheduleStatus.Active
+};
+
+payPlanService.addSchedule(newSchedule, function (err, schedule) {
+    // handle response
+});
 {% endhighlight %}
+
+### Useful Enumerations
+
+Enumeration                 | Constant
+--------------------------- | --------
+HpsPayPlanScheduleStatus    | Active
+                            | Inactive
+                            | Failed
+HpsPayPlanScheduleDuration  | Ongoing
+                            | EndDate
+                            | LimitedNumber
+HpsPayPlanScheduleFrequency | Weekly
+                            | BiWeekly
+                            | SemiMonthly
+                            | Monthly
+                            | Quarterly
+                            | SemiAnnually
+                            | Annually
 
 ### Failed Scheduled Transactions
 
@@ -252,62 +384,66 @@ Once the payment method is updated an edit can be performed to restart the sched
 
 ## Find Customers
 
-You can find customers associated with a given payment method using this method call.
+You can find customers associated using this method call.
 
 > Find Customers
 
 {% highlight csharp %}
 // without paging:
-var response = _payPlanService.FindAllCustomers();
+var response = payPlanService.FindAllCustomers();
 
 // with paging:
-_payPlanService.SetPagination(1, 0);
-var response = _payPlanService.FindAllCustomers();
+payPlanService.SetPagination(1, 0);
+var response = payPlanService.FindAllCustomers();
 
 // with filters:
-var searchParams = new Dictionary<string, object> {{"customerIdentifier", "SecureSubmit"}};
-var response = _payPlanService.FindAllCustomers(searchParams);
+var searchParams = new Dictionary<string, object> {
+    {"customerIdentifier", "SecureSubmit"}
+};
+var response = payPlanService.FindAllCustomers(searchParams);
 {% endhighlight %}
 
 {% highlight php %}
 <?php
 // without paging:
-$results = $this->service->findAll();
+$results = $payPlanService->findAll();
 
 // with paging:
-$results = $this->service
-            ->page(1, 0)
-            ->findAll();
+$results = $payPlanService
+    ->page(1, 0)
+    ->findAll();
 
 // with filters:
-$results = $this->service
-            ->findAll(array('customerIdentifier' => 'SecureSubmit'));
+$results = $payPlanService
+    ->findAll(array(
+        'customerIdentifier' => 'SecureSubmit'
+    ));
 {% endhighlight %}
 
 {% highlight java %}
 // without paging:
-HpsPayPlanCustomerCollection results = this.service.findAllCustomers();
+HpsPayPlanCustomerCollection results = payPlanService.findAllCustomers();
 
 // with paging:
-this.service.setPagination(1, 0);
-HpsPayPlanCustomerCollection results = this.service.findAllCustomers();
+payPlanService.setPagination(1, 0);
+HpsPayPlanCustomerCollection results = payPlanService.findAllCustomers();
 
 // with filters:
 HashMap<String, Object> searchParams = new HashMap<String, Object>();
 searchParams.put("customerIdentifier", "SecureSubmit");
 
-HpsPayPlanCustomerCollection results = this.service.findAllCustomers(searchParams);
+HpsPayPlanCustomerCollection results = payPlanService.findAllCustomers(searchParams);
 {% endhighlight %}
 
 {% highlight python %}
 // without paging:
-results = self.service.find_all_customers()
+results = payplan_service.find_all_customers()
 
 // with paging:
-results = self.service.page(1, 0).find_all_customers()
+results = payplan_service.page(1, 0).find_all_customers()
 
 // with filters:
-results = self.service.find_all_customers({'customerIdentifier': 'SecureSubmit'})
+results = payplan_service.find_all_customers({'customerIdentifier': 'SecureSubmit'})
 {% endhighlight %}
 
 {% highlight ruby %}
@@ -315,7 +451,208 @@ results = self.service.find_all_customers({'customerIdentifier': 'SecureSubmit'}
 {% endhighlight %}
 
 {% highlight js %}
-// coming soon
+// without paging:
+payPlanService.findAllCustomers(function (err, result) {
+    // handle response
+});
+
+// with paging:
+payPlanService.page(1, 0).findAllCustomers(function (err, result) {
+    // handle response
+});
+
+// with filters:
+var searchParams = {
+    customerIdentifier: 'SecureSubmit'
+};
+payPlanService.findAllCustomers(
+    searchParams,
+    function (err, result) {
+        // handle response
+    }
+);
+{% endhighlight %}
+
+## Find Payment Methods
+
+You can find payment methods associated using this method call.
+
+> Find Payment Methods
+
+{% highlight csharp %}
+// without paging:
+var response = payPlanService.FindAllPaymentMethods();
+
+// with paging:
+payPlanService.SetPagination(1, 0);
+var response = payPlanService.FindAllPaymentMethods();
+
+// with filters:
+var searchParams = new Dictionary<string, object> {
+    {"customerIdentifier", "SecureSubmit"}
+};
+var response = payPlanService.FindAllPaymentMethods(searchParams);
+{% endhighlight %}
+
+{% highlight php %}
+<?php
+// without paging:
+$results = $payPlanService->findAll();
+
+// with paging:
+$results = $payPlanService
+    ->page(1, 0)
+    ->findAll();
+
+// with filters:
+$results = $payPlanService
+    ->findAll(array(
+        'customerIdentifier' => 'SecureSubmit'
+    ));
+{% endhighlight %}
+
+{% highlight java %}
+// without paging:
+HpsPayPlanCustomerCollection results = payPlanService.findAllPaymentMethods();
+
+// with paging:
+payPlanService.setPagination(1, 0);
+HpsPayPlanCustomerCollection results = payPlanService.findAllPaymentMethods();
+
+// with filters:
+HashMap<String, Object> searchParams = new HashMap<String, Object>();
+searchParams.put("customerIdentifier", "SecureSubmit");
+
+HpsPayPlanCustomerCollection results = payPlanService.findAllPaymentMethods(searchParams);
+{% endhighlight %}
+
+{% highlight python %}
+// without paging:
+results = payplan_service.find_all_payment_methods()
+
+// with paging:
+results = payplan_service.page(1, 0).find_all_payment_methods()
+
+// with filters:
+results = payplan_service.find_all_payment_methods({'customerIdentifier': 'SecureSubmit'})
+{% endhighlight %}
+
+{% highlight ruby %}
+# coming soon
+{% endhighlight %}
+
+{% highlight js %}
+// without paging:
+payPlanService.findAllPaymentMethods(function (err, result) {
+    // handle response
+});
+
+// with paging:
+payPlanService.page(1, 0).findAllPaymentMethods(function (err, result) {
+    // handle response
+});
+
+// with filters:
+var searchParams = {
+    customerIdentifier: 'SecureSubmit'
+};
+payPlanService.findAllPaymentMethods(
+    searchParams,
+    function (err, result) {
+        // handle response
+    }
+);
+{% endhighlight %}
+
+## Find Schedules
+
+You can find schedules associated using this method call.
+
+> Find Schedules
+
+{% highlight csharp %}
+// without paging:
+var response = payPlanService.FindAllSchedules();
+
+// with paging:
+payPlanService.SetPagination(1, 0);
+var response = payPlanService.FindAllSchedules();
+
+// with filters:
+var searchParams = new Dictionary<string, object> {
+    {"customerIdentifier", "SecureSubmit"}
+};
+var response = payPlanService.FindAllSchedules(searchParams);
+{% endhighlight %}
+
+{% highlight php %}
+<?php
+// without paging:
+$results = $payPlanService->findAll();
+
+// with paging:
+$results = $payPlanService
+    ->page(1, 0)
+    ->findAll();
+
+// with filters:
+$results = $payPlanService
+    ->findAll(array(
+        'customerIdentifier' => 'SecureSubmit'
+    ));
+{% endhighlight %}
+
+{% highlight java %}
+// without paging:
+HpsPayPlanCustomerCollection results = payPlanService.findAllSchedules();
+
+// with paging:
+payPlanService.setPagination(1, 0);
+HpsPayPlanCustomerCollection results = payPlanService.findAllSchedules();
+
+// with filters:
+HashMap<String, Object> searchParams = new HashMap<String, Object>();
+searchParams.put("customerIdentifier", "SecureSubmit");
+
+HpsPayPlanCustomerCollection results = payPlanService.findAllSchedules(searchParams);
+{% endhighlight %}
+
+{% highlight python %}
+// without paging:
+results = payplan_service.find_all_schedules()
+
+// with paging:
+results = payplan_service.page(1, 0).find_all_schedules()
+
+// with filters:
+results = payplan_service.find_all_schedules({'customerIdentifier': 'SecureSubmit'})
+{% endhighlight %}
+
+{% highlight ruby %}
+# coming soon
+{% endhighlight %}
+
+{% highlight js %}
+// without paging:
+payPlanService.findAllSchedules(function (err, result) {
+    // handle response
+});
+
+// with paging:
+payPlanService.page(1, 0).findAllSchedules(function (err, result) {
+    // handle response
+});
+
+// with filters:
+var searchParams = {
+    customerIdentifier: 'SecureSubmit'
+};
+payPlanService.findAllSchedules(
+    searchParams,
+    function (err, result) {
+        // handle response
+    }
+);
 {% endhighlight %}
 
 ## Edit Schedule
