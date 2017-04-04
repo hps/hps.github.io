@@ -236,7 +236,7 @@ creditService.authorizeWithToken(10, "usd", "put single or multi-use token here"
 Multi-Use Tokenization allows a secure and PCI friendly way to store credit card information within your system. A multi-use token can be generated as part of any of our initial gateway calls: charge, verify or authorize.
 
 <aside class="notice">
-Multi-Use tokens are not enabled by default. You must contact your Heartland Representitive to request this functionality on your account.
+Multi-Use tokens are not enabled by default. You must contact your Heartland Representative to request this functionality on your account.
 </aside>
 
 > Requesting a multi-use token
@@ -467,7 +467,7 @@ chargeService.refund(new BigDecimal("10"), "usd", chargeResponse.getTransactionI
 
 {% highlight ruby %}
 charge_response = charge_service.charge(10, "usd", "put single or multi-use token here", card_holder)
-charge_service.refund(10, "usd", charge_response.transaction_id)
+charge_service.refund_transaction(10, "usd", charge_response.transaction_id)
 {% endhighlight %}
 
 {% highlight python %}

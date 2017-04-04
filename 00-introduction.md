@@ -6,7 +6,7 @@ layout: default
 
 # Introduction
 
-You no longer have to worry about the burdens of PCI compliance because card data never touches your server. The exchange of sensitive information occurs directly between the consumer and Heartland Payment Systems through our Portico Gateway. Our convention-based jQuery plugin streamlines this process so you don't have to worry about obtaining tokens. The plugin handles that request and appends the resulting token to your form before it posts.
+Heartland’s patent pending technology greatly minimizes PCI scope and cost, because card data processed through Secure Submit never touches your server. The exchange of sensitive information occurs directly between the consumer and Heartland Payment Systems through our Portico Gateway. Our convention-based jQuery plugin streamlines this process so you don't have to worry about obtaining tokens. The plugin handles that request and appends the resulting token to your form before it posts.
 
 The Secure Submit API Library is available in many different languages: PHP, .Net, Java, Ruby, and Python. This documentation is intended to speed up the process of implementing the SDK into your solution by providing sample code and instructions
 
@@ -131,7 +131,7 @@ Secure Submit is packaged as a Javascript library. All you need to do is include
       'cardNumber'
     );
   });
-}(window, document, Heartland);
+}(window, document, Heartland));
 </script>
 {% endhighlight %}
 

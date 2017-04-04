@@ -12,20 +12,18 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations
 under the License. -->
 
+{% assign language_tabs_type = page.language_tabs_type | default: 'server' %}
+{% assign language_tabs = site.data.language_tabs[language_tabs_type] %}
+
 <meta charset="utf-8">
 <link href="/Content/css/screen.css" rel="stylesheet" rel="text/css">
-<script type="text/javascript">
-  if (!window.jQuery) {
-    var s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js'
-    document.getElementsByTagName('head')[0].appendChild(s);
-  }
-</script>
+{% if site.baseurl == '' %}
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+{% endif %}
 
 <div class="tocify-wrapper">
   <div class="lang-selector">
-    {% for lang in site.data.language_tabs %}
+    {% for lang in language_tabs %}
       <a href="#" data-language-name="{{ lang.key }}">{{ lang.label }}</a>
     {% endfor %}
   </div>
@@ -37,12 +35,12 @@ under the License. -->
   {% endif %}
   <ul id="docs-toc">
     {% for node in site.pages %}
-      {% if node.hide %}{% break %}{% endif %}
+      {% if node.hide %}{% continue %}{% endif %}
       <li>
         {% if node.url == page.url %}
           <div id="toc"></div>
         {% else %}
-          <a href="{{ node.url | prepend: '/Documentation' }}">{{ node.title }}</a>
+          <a href="{{ node.url | prepend: site.baseurl }}">{{ node.title }}</a>
         {% endif %}
       </li>
     {% endfor %}
@@ -61,9 +59,9 @@ under the License. -->
 
   </div>
   <div class="dark-box">
-    {% if site.data.language_tabs %}
+    {% if language_tabs %}
       <div class="lang-selector">
-        {% for lang in site.data.language_tabs %}
+        {% for lang in language_tabs %}
             <a href="#" data-language-name="{{ lang.key }}">{{ lang.label }}</a>
         {% endfor %}
       </div>
@@ -75,18 +73,17 @@ under the License. -->
 
 <script type="text/javascript">
   (function (window, document, undefined) {
-      $(document).ready(function() {
-	  
-          window.languagesJSON = {{ site.data.language_tabs | map: 'key' | jsonify}};
+    $(document).ready(function() {
+      window.languagesJSON = {{ language_tabs | map: 'key' | jsonify }};
+      {% if site.baseurl == '' %}setupLanguages(window.languagesJSON);{% endif %}
 
-          $('.search, .search-results').appendTo('.nav-sdks-documentation');
-          $('.search, .search-results').hide();
+      $('.search, .search-results').appendTo('.nav-sdks-documentation');
+      $('.search, .search-results').hide();
 
-          $('#docs-toc').appendTo('.sidebar-menu .nav-sdks-documentation');
-		  
-		  $('#docs-toc').clone().appendTo('.mobile-docs-nav');
-		  $('.mobile-docs-nav #docs-toc').addClass("dropdown-menu");
-		  
-        });
+      $('#docs-toc').appendTo('.sidebar-menu .nav-sdks-documentation');
+
+      $('#docs-toc').clone().appendTo('.mobile-docs-nav');
+      $('.mobile-docs-nav #docs-toc').addClass("dropdown-menu");
+    });
   }(window, window.document));
 </script>
