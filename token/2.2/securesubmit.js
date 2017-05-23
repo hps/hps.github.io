@@ -704,6 +704,7 @@ var DOM = (function () {
         frame.style.border = '0';
         frame.frameBorder = '0';
         frame.scrolling = 'no';
+        frame.setAttribute('allowtransparency', 'true');
         return frame;
     };
     /**
@@ -1308,6 +1309,35 @@ var Events = (function () {
             success: tokenResponse('onTokenSuccess'),
             type: 'pan'
         });
+    };
+    /**
+     * addFieldFrameFocusEvent
+     *
+     * Ensures an iframe's document forwards its received focus
+     * to the input field. Helps provide consistent behavior in
+     * all browsers.
+     *
+     * @param {Heartland.HPS} hps
+     */
+    Events.addFieldFrameFocusEvent = function (hps) {
+        var element = document.getElementById('heartland-field');
+        var focusEventName = 'focus';
+        if (document['on' + focusEventName + 'in']) {
+            document.addEventListener(focusEventName + 'in', function (e) {
+                if (event.fromElement === element) {
+                    return;
+                }
+                if (event.relatedTarget) {
+                    return;
+                }
+                element.focus();
+            }, false);
+        }
+        else {
+            document.addEventListener(focusEventName, function (e) {
+                element.focus();
+            }, false);
+        }
     };
     return Events;
 }());
@@ -2839,6 +2869,7 @@ var HPS = (function () {
                 if (Card[method]) {
                     Card[method]('#heartland-field');
                 }
+                Events.addFieldFrameFocusEvent(hps);
             };
         }(this));
         this.receiveMessageHandlerAddedHandler = (function (hps) {
