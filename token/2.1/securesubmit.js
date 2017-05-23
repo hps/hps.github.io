@@ -1309,29 +1309,6 @@ var Events = (function () {
             type: 'pan'
         });
     };
-    /**
-     * Ensures frame's input field is active instead of frame
-     *
-     * @param {HPS} HPS instance
-     * @param {Object} event data
-     */
-    Events.ensureFrameFocusToInput = function (hps, event) {
-        if (event.type !== "blur") {
-            return;
-        }
-        var order = hps.options.tabOrder;
-        var name = event.source;
-        if (!name) {
-            return;
-        }
-        var targetIndex = order.indexOf(name);
-        if (targetIndex === -1) {
-            return;
-        }
-        if (targetIndex + 1 <= order.length && order[targetIndex + 1]) {
-            hps.setFocus(order[targetIndex + 1]);
-        }
-    };
     return Events;
 }());
 
@@ -1740,7 +1717,6 @@ var defaults = {
     pinBlock: '',
     publicKey: '',
     success: null,
-    tabOrder: ['cardNumber', 'cardExpiration', 'cardCvv', 'submit'],
     targetType: '',
     tokenType: 'supt',
     track: '',
@@ -2241,9 +2217,6 @@ var Frames = (function () {
                     }, cardNumberFieldFrame.name);
                     break;
                 case 'fieldEvent':
-                    if (hps.options.tabOrder) {
-                        Events.ensureFrameFocusToInput(hps, data.event);
-                    }
                     if (!options.onEvent) {
                         break;
                     }
