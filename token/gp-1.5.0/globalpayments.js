@@ -2247,7 +2247,7 @@
 		postMessage: postMessage
 	});
 
-	var version = "1.3.0";
+	var version = "1.5.0";
 
 	var getAssetBaseUrl = (function (result) {
 	    var gateway = getGateway();
